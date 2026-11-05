@@ -1,0 +1,1115 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mode d'emploi du volet Synthèse</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout : dossier technique. Index collant à gauche, colonne de lecture d'environ 68 caractères, schémas pleine largeur. */
+:root {
+  --paper: #F3F5F8;
+  --surface: #FFFFFF;
+  --ink: #141A22;
+  --muted: #586272;
+  --rule: #D6DCE4;
+  --accent: #1C5AA6;
+  --accent-soft: #E2EBF7;
+  --amber: #9A6200;
+  --amber-soft: #FBF0D9;
+  --stop: #B42318;
+  --code-bg: #EBEFF4;
+
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.6rem;
+  --step-3: 2.1rem;
+  --step-4: 2.8rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0F1318;
+    --surface: #161B22;
+    --ink: #E4E8EE;
+    --muted: #9AA4B3;
+    --rule: #2A323D;
+    --accent: #7EB0EE;
+    --accent-soft: #19283C;
+    --amber: #E3AC42;
+    --amber-soft: #2C2312;
+    --stop: #F2776C;
+    --code-bg: #1B212A;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0F1318;
+  --surface: #161B22;
+  --ink: #E4E8EE;
+  --muted: #9AA4B3;
+  --rule: #2A323D;
+  --accent: #7EB0EE;
+  --accent-soft: #19283C;
+  --amber: #E3AC42;
+  --amber-soft: #2C2312;
+  --stop: #F2776C;
+  --code-bg: #1B212A;
+}
+
+html { scroll-padding-top: 20px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: var(--step-0);
+  line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--paper);
+}
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 40px 96px; }
+
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.15; margin: 0; }
+h1 { font-size: var(--step-4); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: var(--step-3); font-weight: 700; }
+h3 { font-size: var(--step-1); font-weight: 600; }
+
+p, ul, ol { margin: 0; }
+.prose { display: flex; flex-direction: column; gap: 14px; }
+.prose > p, .prose > ul, .prose > ol { max-width: 68ch; }
+.prose ul, .prose ol { padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+
+code {
+  font-family: var(--f-mono);
+  font-size: 0.88em;
+  background: var(--code-bg);
+  padding: 0.08em 0.36em;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* En-tête */
+.masthead { display: flex; flex-direction: column; gap: 16px; padding-bottom: 32px; border-bottom: 1px solid var(--rule); }
+.lede { font-size: var(--step-1); color: var(--muted); max-width: 62ch; line-height: 1.5; }
+.status { display: flex; flex-wrap: wrap; gap: 20px 36px; margin-top: 8px; }
+.status-group { display: flex; flex-direction: column; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.chip.todo { border-style: dashed; border-color: var(--muted); background: transparent; color: var(--muted); }
+
+/* Mise en page principale */
+.layout { display: grid; gap: 40px; margin-top: 40px; }
+.toc { display: flex; flex-direction: column; gap: 10px; }
+.toc ol { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 4px 16px; }
+.toc a { display: block; padding: 3px 0; color: var(--ink); text-decoration: none; font-size: 0.93rem; }
+.toc a:hover { color: var(--accent); }
+.toc .sub a { padding-left: 12px; color: var(--muted); font-size: 0.88rem; }
+@media (min-width: 1040px) {
+  .layout { grid-template-columns: 200px minmax(0, 1fr); gap: 56px; }
+  .toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+  .toc ol { grid-template-columns: 1fr; }
+}
+
+main { display: flex; flex-direction: column; gap: 72px; min-width: 0; }
+section { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.section-head { display: flex; flex-direction: column; gap: 6px; }
+.subsection { display: flex; flex-direction: column; gap: 16px; padding-top: 12px; }
+
+/* Schémas */
+figure { margin: 4px 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; }
+.diagram svg { display: block; width: 100%; height: auto; min-width: 640px; }
+.diagram.narrow svg { min-width: 560px; }
+figcaption { font-size: var(--step--1); color: var(--muted); max-width: 72ch; }
+
+.d-box { fill: var(--surface); stroke: var(--ink); stroke-width: 1.2; }
+.d-box.todo { stroke: var(--muted); stroke-dasharray: 5 4; }
+.d-box.hl { fill: var(--accent-soft); stroke: var(--accent); }
+.d-frame { fill: none; stroke: var(--rule); stroke-width: 1.5; }
+.d-title { font-family: var(--f-body); font-size: 13px; font-weight: 600; fill: var(--ink); }
+.d-mono { font-family: var(--f-mono); font-size: 12px; font-weight: 500; fill: var(--ink); }
+.d-cap { font-family: var(--f-body); font-size: 11px; fill: var(--muted); }
+.d-capmono { font-family: var(--f-mono); font-size: 10.5px; fill: var(--muted); }
+.d-lab { font-family: var(--f-mono); font-size: 10.5px; font-weight: 500; fill: var(--ink); }
+.d-group { font-family: var(--f-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; fill: var(--muted); }
+.d-line { stroke: var(--ink); stroke-width: 1.3; fill: none; }
+.d-amber { stroke: var(--amber); stroke-width: 2; fill: none; }
+.d-stop { stroke: var(--stop); stroke-width: 1.5; stroke-dasharray: 4 4; fill: none; }
+.t-amber { fill: var(--amber); font-weight: 600; }
+.t-stop { fill: var(--stop); }
+.m-ink { fill: var(--ink); }
+.m-amber { fill: var(--amber); }
+.m-stop { fill: var(--stop); }
+.hu-tick { stroke: var(--ink); stroke-width: 1; }
+.hu-bar { stroke: var(--rule); stroke-width: 1; }
+
+/* Blocs de code */
+.code { position: relative; min-width: 0; }
+pre {
+  margin: 0;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: var(--f-mono);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+.code pre:not(.tree) { padding-right: 96px; }
+.code .where {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+pre .c { color: var(--muted); }
+.copy {
+  position: absolute;
+  top: 28px;
+  right: 8px;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  padding: 3px 9px;
+  border-radius: 5px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+.copy:hover { color: var(--ink); border-color: var(--muted); }
+.code.nolabel .copy { top: 8px; }
+
+/* Fiches fichier */
+.fiche {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.fiche-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.fiche-head .file { font-family: var(--f-mono); font-weight: 600; font-size: 1.05rem; }
+.fiche-head .role { color: var(--muted); }
+.fiche dl { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px 18px; margin: 0; }
+.fiche dt { font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.fiche dd { margin: 0; max-width: 64ch; }
+@media (max-width: 560px) { .fiche dl { grid-template-columns: 1fr; gap: 2px; } .fiche dd { margin-bottom: 8px; } }
+
+/* Identifiant patient */
+.idcode { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+.idpart { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 64px; }
+.idpart .glyph {
+  font-family: var(--f-mono);
+  font-size: 2rem;
+  font-weight: 600;
+  padding: 2px 12px;
+  border-bottom: 2px solid var(--accent);
+  line-height: 1.2;
+}
+.idpart .what { font-size: 0.82rem; color: var(--muted); text-align: center; max-width: 13ch; line-height: 1.35; }
+
+/* Tableaux */
+.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+tr:last-child td { border-bottom: none; }
+th { font-family: var(--f-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--paper); }
+td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-size: 0.86rem; white-space: nowrap; }
+
+/* Encadrés */
+.callout { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; max-width: 76ch; }
+.callout .label { font-family: var(--f-mono); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.callout.warn { border-color: var(--amber); background: var(--amber-soft); }
+.callout.warn .label { color: var(--amber); }
+
+/* Notions */
+.terms { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.term { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+.term b { font-family: var(--f-display); font-size: 1.08rem; font-weight: 600; }
+.term span { color: var(--muted); font-size: 0.93rem; line-height: 1.5; }
+
+/* Arborescence */
+.tree { line-height: 1.75; }
+.tree .t-dir { font-weight: 600; }
+.tree .t-note { color: var(--muted); }
+
+/* Étapes du tutoriel */
+.steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 28px; counter-reset: step; }
+.steps > li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; counter-increment: step; }
+.steps > li::before {
+  content: counter(step);
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.step-body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.step-body h3 { padding-top: 5px; }
+.step-body > p { max-width: 66ch; }
+.expect { font-size: 0.92rem; color: var(--muted); max-width: 66ch; }
+.expect b { color: var(--ink); font-weight: 600; }
+.where-tag { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--rule); color: var(--muted); margin-left: 8px; vertical-align: 3px; white-space: nowrap; }
+
+.golden { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.golden li { display: flex; flex-direction: column; gap: 2px; max-width: 70ch; }
+.golden b { font-weight: 600; }
+
+footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--step--1); }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <span class="eyebrow">IMT Atlantique × LaTIM · Sujet A · volet Synthèse</span>
+    <h1>Mode d'emploi du volet Synthèse</h1>
+    <p class="lede">Ce que fait chaque fichier du dossier <code>Synthesis/</code>, comment ils s'enchaînent, et comment les lancer sur la station <code>latim5090</code>, commande par commande.</p>
+    <div class="status">
+      <div class="status-group">
+        <span class="eyebrow">Déjà écrit et testé</span>
+        <div class="chips">
+          <span class="chip">split train / val / test</span>
+          <span class="chip">pré-traitement</span>
+          <span class="chip">entraînement U-Net</span>
+          <span class="chip">génération des sCT</span>
+          <span class="chip">gestion des VLM</span>
+          <span class="chip">juge VLM</span>
+          <span class="chip">benchmark</span>
+        </div>
+      </div>
+      <div class="status-group">
+        <span class="eyebrow">À venir</span>
+        <div class="chips">
+          <span class="chip todo">métriques + rendu PNG</span>
+          <span class="chip todo">analyse des corrélations</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Sommaire">
+      <span class="eyebrow">Sommaire</span>
+      <ol>
+        <li><a href="#idee">L'idée en une minute</a></li>
+        <li><a href="#chaine">La chaîne complète</a></li>
+        <li><a href="#machines">Où tourne quoi</a></li>
+        <li><a href="#fichiers">Les fichiers</a></li>
+        <li><a href="#notions">Les notions utiles</a></li>
+        <li><a href="#partie-a">Partie A : les sCT</a></li>
+        <li class="sub"><a href="#split">make_split.py</a></li>
+        <li class="sub"><a href="#preprocess">preprocess.py</a></li>
+        <li class="sub"><a href="#train">train.py</a></li>
+        <li class="sub"><a href="#predict">predict.py</a></li>
+        <li><a href="#partie-b">Partie B : le juge VLM</a></li>
+        <li class="sub"><a href="#manager">vlm_manager.py</a></li>
+        <li class="sub"><a href="#judge">judge.py</a></li>
+        <li class="sub"><a href="#benchmark">benchmark.py</a></li>
+        <li><a href="#tuto">Tutoriel pas à pas</a></li>
+        <li><a href="#suite">Ce qui reste à faire</a></li>
+        <li><a href="#depannage">Dépannage</a></li>
+        <li><a href="#regles">Les règles d'or</a></li>
+      </ol>
+    </nav>
+
+    <main>
+      <!-- ============================================================ -->
+      <section id="idee">
+        <div class="section-head">
+          <span class="eyebrow">Pour commencer</span>
+          <h2>L'idée en une minute</h2>
+        </div>
+        <div class="prose">
+          <p>Le projet pose une question : <b>un VLM (modèle qui regarde une image et répond en texte) peut-il juger la qualité d'un CT synthétique, sans connaître la vraie réponse ?</b></p>
+          <p>Pour y répondre, il faut trois choses, et le code est organisé exactement comme ça :</p>
+          <ol>
+            <li><b>Des CT synthétiques (sCT) de qualité variée</b>, du très mauvais au très bon. C'est le rôle du dossier <code>sct_generation/</code> : il entraîne un réseau qui transforme une IRM en CT, et garde des versions du réseau à différents moments de son apprentissage.</li>
+            <li><b>Une mesure objective de leur qualité</b> (MAE, SSIM, gamma…), calculée en comparant chaque sCT au vrai CT. Ce script est à venir.</li>
+            <li><b>Le jugement des VLM</b> sur ces mêmes sCT, sans leur montrer le vrai CT ni les mesures. C'est le rôle du dossier <code>pipeline/</code>.</li>
+          </ol>
+          <p>À la fin, on compare les notes des VLM aux mesures objectives. Si les deux classent les sCT dans le même ordre, le VLM est un bon juge.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="chaine">
+        <div class="section-head">
+          <span class="eyebrow">Architecture</span>
+          <h2>La chaîne complète</h2>
+        </div>
+        <div class="prose">
+          <p>Chaque boîte est un script. Chaque flèche est un fichier qu'un script écrit et que le suivant lit. On lance les scripts dans l'ordre, de gauche à droite en haut, puis de droite à gauche en bas.</p>
+        </div>
+        <figure>
+          <div class="diagram">
+            <svg viewBox="0 0 960 390" role="img" aria-label="Chaîne complète : SynthRAD2023, make_split, preprocess, train et predict produisent des sCT ; le rendu PNG les envoie au benchmark VLM, dont les notes vont à l'analyse ; les métriques vont directement à l'analyse sans passer par le VLM.">
+              <defs>
+                <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-ink"/></marker>
+                <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-amber"/></marker>
+              </defs>
+
+              <text x="20" y="32" class="d-group">PARTIE A · sct_generation/</text>
+
+              <rect x="20" y="50" width="130" height="64" rx="6" class="d-box"/>
+              <text x="85" y="78" text-anchor="middle" class="d-title">SynthRAD2023</text>
+              <text x="85" y="98" text-anchor="middle" class="d-cap">IRM, CT, masque</text>
+
+              <rect x="218" y="50" width="130" height="64" rx="6" class="d-box"/>
+              <text x="283" y="78" text-anchor="middle" class="d-mono">make_split.py</text>
+              <text x="283" y="98" text-anchor="middle" class="d-cap">train · val · test</text>
+
+              <rect x="415" y="50" width="130" height="64" rx="6" class="d-box"/>
+              <text x="480" y="78" text-anchor="middle" class="d-mono">preprocess.py</text>
+              <text x="480" y="98" text-anchor="middle" class="d-cap">normalise</text>
+
+              <rect x="613" y="50" width="130" height="64" rx="6" class="d-box"/>
+              <text x="678" y="78" text-anchor="middle" class="d-mono">train.py</text>
+              <text x="678" y="98" text-anchor="middle" class="d-cap">apprend IRM → CT</text>
+
+              <rect x="810" y="50" width="130" height="64" rx="6" class="d-box"/>
+              <text x="875" y="78" text-anchor="middle" class="d-mono">predict.py</text>
+              <text x="875" y="98" text-anchor="middle" class="d-cap">1 sCT / checkpoint</text>
+
+              <line x1="150" y1="82" x2="216" y2="82" class="d-line" marker-end="url(#ah)"/>
+              <text x="183" y="74" text-anchor="middle" class="d-lab">.nii.gz</text>
+              <line x1="348" y1="82" x2="413" y2="82" class="d-line" marker-end="url(#ah)"/>
+              <text x="381" y="74" text-anchor="middle" class="d-lab">split.csv</text>
+              <line x1="545" y1="82" x2="611" y2="82" class="d-line" marker-end="url(#ah)"/>
+              <text x="578" y="74" text-anchor="middle" class="d-lab">.npy</text>
+              <line x1="743" y1="82" x2="808" y2="82" class="d-line" marker-end="url(#ah)"/>
+              <text x="776" y="74" text-anchor="middle" class="d-lab">.pt</text>
+
+              <line x1="875" y1="114" x2="875" y2="218" class="d-line" marker-end="url(#ah)"/>
+              <text x="883" y="170" class="d-lab">sct.nii.gz</text>
+
+              <text x="470" y="208" class="d-group">PARTIE B · pipeline/</text>
+
+              <rect x="790" y="220" width="150" height="64" rx="6" class="d-box todo"/>
+              <text x="865" y="248" text-anchor="middle" class="d-title">Rendu PNG</text>
+              <text x="865" y="268" text-anchor="middle" class="d-cap">+ métriques · à venir</text>
+
+              <rect x="470" y="220" width="170" height="64" rx="6" class="d-box hl"/>
+              <text x="555" y="248" text-anchor="middle" class="d-mono">benchmark.py</text>
+              <text x="555" y="268" text-anchor="middle" class="d-cap">VLM via Ollama</text>
+
+              <rect x="60" y="220" width="150" height="64" rx="6" class="d-box todo"/>
+              <text x="135" y="248" text-anchor="middle" class="d-title">Analyse</text>
+              <text x="135" y="268" text-anchor="middle" class="d-cap">corrélations · à venir</text>
+
+              <line x1="790" y1="252" x2="642" y2="252" class="d-line" marker-end="url(#ah)"/>
+              <text x="716" y="244" text-anchor="middle" class="d-lab">PNG + testbench.csv</text>
+              <line x1="470" y1="252" x2="212" y2="252" class="d-line" marker-end="url(#ah)"/>
+              <text x="341" y="244" text-anchor="middle" class="d-lab">judgements.csv</text>
+
+              <polyline points="865,284 865,350 135,350 135,288" class="d-amber" marker-end="url(#ah-amber)"/>
+              <text x="500" y="340" text-anchor="middle" class="d-lab t-amber">MAE, SSIM, gamma : jamais montrés au VLM</text>
+            </svg>
+          </div>
+          <figcaption>La chaîne complète. Les boîtes en pointillés n'existent pas encore. Le chemin orange est la règle centrale du projet : les mesures objectives vont directement à l'analyse et ne passent jamais par le VLM.</figcaption>
+        </figure>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="machines">
+        <div class="section-head">
+          <span class="eyebrow">Architecture</span>
+          <h2>Où tourne quoi</h2>
+        </div>
+        <div class="prose">
+          <p>Il y a deux machines. <b>Ton PC</b> sert à écrire le code. <b>La station <code>latim5090</code></b> sert à l'exécuter : c'est là que se trouvent la carte graphique RTX 5090, les données et Ollama. GitHub fait le lien entre les deux.</p>
+        </div>
+        <figure>
+          <div class="diagram">
+            <svg viewBox="0 0 960 320" role="img" aria-label="Le PC pousse le code sur GitHub, la station le récupère avec git pull. Le PC se connecte à la station en SSH via Tailscale. Sur la station, le code parle à Ollama en local, utilise le GPU et lit les données. Un appel direct du PC vers Ollama est refusé.">
+              <defs>
+                <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-ink"/></marker>
+                <marker id="ah2-stop" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-stop"/></marker>
+              </defs>
+
+              <rect x="20" y="40" width="200" height="120" rx="8" class="d-box"/>
+              <text x="120" y="68" text-anchor="middle" class="d-title">Ton PC</text>
+              <text x="120" y="92" text-anchor="middle" class="d-cap">écrire le code (VS Code)</text>
+              <text x="120" y="112" text-anchor="middle" class="d-cap">git commit · git push</text>
+              <text x="120" y="132" text-anchor="middle" class="d-cap">scp pour récupérer</text>
+
+              <rect x="20" y="230" width="200" height="70" rx="8" class="d-box"/>
+              <text x="120" y="258" text-anchor="middle" class="d-title">GitHub</text>
+              <text x="120" y="280" text-anchor="middle" class="d-cap">dépôt public</text>
+
+              <rect x="360" y="14" width="585" height="296" rx="12" class="d-frame"/>
+              <text x="378" y="36" class="d-group">LATIM5090 · COMPTE STUDENT PARTAGÉ</text>
+
+              <rect x="390" y="50" width="200" height="240" rx="8" class="d-box hl"/>
+              <text x="490" y="150" text-anchor="middle" class="d-title">Clone du dépôt</text>
+              <text x="490" y="174" text-anchor="middle" class="d-capmono">~/projects/…</text>
+              <text x="490" y="196" text-anchor="middle" class="d-capmono">uv run python …</text>
+
+              <rect x="700" y="50" width="225" height="60" rx="8" class="d-box"/>
+              <text x="812" y="74" text-anchor="middle" class="d-title">Ollama</text>
+              <text x="812" y="95" text-anchor="middle" class="d-capmono">127.0.0.1:11434</text>
+
+              <rect x="700" y="140" width="225" height="60" rx="8" class="d-box"/>
+              <text x="812" y="164" text-anchor="middle" class="d-title">GPU RTX 5090</text>
+              <text x="812" y="185" text-anchor="middle" class="d-cap">32 Go de VRAM</text>
+
+              <rect x="700" y="230" width="225" height="60" rx="8" class="d-box"/>
+              <text x="812" y="254" text-anchor="middle" class="d-title">Données SynthRAD</text>
+              <text x="812" y="275" text-anchor="middle" class="d-capmono">~/DATA/SYNTHESIS/brain</text>
+
+              <line x1="220" y1="120" x2="388" y2="120" class="d-line" marker-end="url(#ah2)"/>
+              <text x="304" y="112" text-anchor="middle" class="d-lab">ssh · Tailscale</text>
+
+              <line x1="120" y1="160" x2="120" y2="228" class="d-line" marker-end="url(#ah2)"/>
+              <text x="130" y="198" class="d-lab">git push</text>
+
+              <line x1="220" y1="265" x2="388" y2="265" class="d-line" marker-end="url(#ah2)"/>
+              <text x="304" y="257" text-anchor="middle" class="d-lab">git pull</text>
+
+              <line x1="220" y1="62" x2="354" y2="62" class="d-stop" marker-end="url(#ah2-stop)"/>
+              <text x="287" y="54" text-anchor="middle" class="d-lab t-stop">vers Ollama : refusé</text>
+
+              <line x1="590" y1="80" x2="698" y2="80" class="d-line" marker-end="url(#ah2)"/>
+              <text x="644" y="72" text-anchor="middle" class="d-lab">HTTP local</text>
+              <line x1="590" y1="170" x2="698" y2="170" class="d-line" marker-end="url(#ah2)"/>
+              <text x="644" y="162" text-anchor="middle" class="d-lab">PyTorch</text>
+              <line x1="590" y1="260" x2="698" y2="260" class="d-line" marker-end="url(#ah2)"/>
+              <text x="644" y="252" text-anchor="middle" class="d-lab">lit</text>
+            </svg>
+          </div>
+          <figcaption>Tout s'exécute sur la station. Ton PC envoie le code sur GitHub, la station le récupère avec <code>git pull</code>, et tu lances les commandes depuis un terminal SSH. Ollama n'accepte que les connexions venant de la station elle-même : un script lancé sur ton PC ne peut pas l'utiliser.</figcaption>
+        </figure>
+        <div class="callout warn">
+          <span class="label">Compte partagé</span>
+          <p>Le compte <code>student</code> sert à toutes les équipes : même dossier personnel, même GPU, même cache de modèles. On ne stocke aucun identifiant GitHub sur la station, on ne décharge jamais le modèle de quelqu'un d'autre et on lance les longs calculs aux heures creuses.</p>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="fichiers">
+        <div class="section-head">
+          <span class="eyebrow">Architecture</span>
+          <h2>Les fichiers</h2>
+        </div>
+        <div class="prose">
+          <p>Chaque dossier a un <code>config.py</code> : c'est le seul fichier à modifier pour changer un réglage (chemin, nombre d'époques, liste des modèles…). Les autres fichiers contiennent la logique.</p>
+        </div>
+        <div class="code nolabel">
+<pre class="tree"><code><span class="t-dir">Synthesis/</span>
+├── README.md               <span class="t-note">vue d'ensemble</span>
+├── pyproject.toml          <span class="t-note">liste des bibliothèques Python</span>
+├── uv.lock                 <span class="t-note">leurs versions exactes, figées pour toute l'équipe</span>
+├── .gitignore              <span class="t-note">ce que git ne doit jamais enregistrer</span>
+│
+├── <span class="t-dir">sct_generation/</span>         <span class="t-note">PARTIE A : fabriquer les sCT</span>
+│   ├── config.py           <span class="t-note">chemins et réglages d'entraînement</span>
+│   ├── make_split.py       <span class="t-note">1. découpe les patients en train / val / test</span>
+│   ├── preprocess.py       <span class="t-note">2. normalise les images et les met en cache</span>
+│   ├── data.py             <span class="t-note">   outils de lecture des données (utilisé par 3 et 4)</span>
+│   ├── model.py            <span class="t-note">   le réseau U-Net (utilisé par 3 et 4)</span>
+│   ├── train.py            <span class="t-note">3. entraîne le réseau, sauvegarde des checkpoints</span>
+│   ├── predict.py          <span class="t-note">4. génère les sCT avec chaque checkpoint</span>
+│   ├── <span class="t-dir">splits/</span>             <span class="t-note">le découpage, versionné dans git</span>
+│   └── <span class="t-dir">work/</span>               <span class="t-note">cache, checkpoints, sCT : jamais dans git</span>
+│
+├── <span class="t-dir">pipeline/</span>               <span class="t-note">PARTIE B : faire juger les sCT par les VLM</span>
+│   ├── config.py           <span class="t-note">modèles, prompts, température, graine</span>
+│   ├── vlm_manager.py      <span class="t-note">télécharger, charger, décharger les VLM</span>
+│   ├── judge.py            <span class="t-note">faire noter une image par un VLM</span>
+│   └── benchmark.py        <span class="t-note">tous les VLM × toutes les images → CSV</span>
+│
+└── <span class="t-dir">results/</span>
+    └── judgements.csv      <span class="t-note">une ligne par note donnée par un VLM</span></code></pre>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="notions">
+        <div class="section-head">
+          <span class="eyebrow">Vocabulaire</span>
+          <h2>Les notions utiles</h2>
+        </div>
+        <div class="terms">
+          <div class="term"><b>sCT (CT synthétique)</b><span>Un CT fabriqué par un réseau à partir d'une IRM. C'est ce qu'on fait juger aux VLM.</span></div>
+          <div class="term"><b>HU (unités Hounsfield)</b><span>L'unité des valeurs d'un CT : −1000 pour l'air, 0 pour l'eau, plusieurs centaines pour l'os.</span></div>
+          <div class="term"><b>Volume NIfTI (.nii.gz)</b><span>Le format des images 3D de SynthRAD : une pile de coupes 2D, avec la taille des voxels en millimètres.</span></div>
+          <div class="term"><b>Split train / val / test</b><span>Trois groupes de patients : pour apprendre, pour régler, et pour évaluer à la fin sur des patients jamais vus.</span></div>
+          <div class="term"><b>Époque</b><span>Un tour d'entraînement. Ici, une époque = 2000 coupes tirées au hasard.</span></div>
+          <div class="term"><b>Checkpoint</b><span>Une sauvegarde du réseau à une époque donnée (fichier <code>.pt</code>). Un checkpoint précoce donne des sCT flous, un checkpoint tardif de bons sCT.</span></div>
+          <div class="term"><b>MAE</b><span>Erreur absolue moyenne entre le sCT et le vrai CT, en HU. Plus elle est basse, meilleur est le sCT.</span></div>
+          <div class="term"><b>VLM</b><span>Modèle vision-langage : il reçoit une image et une consigne (le prompt), et répond en texte.</span></div>
+          <div class="term"><b>Ollama</b><span>Le logiciel qui fait tourner les VLM sur la station, sans rien envoyer sur Internet.</span></div>
+          <div class="term"><b>VRAM</b><span>La mémoire de la carte graphique (32 Go). Un modèle doit y être chargé pour répondre vite.</span></div>
+          <div class="term"><b>uv</b><span>L'outil qui installe les bibliothèques Python. <code>uv run python script.py</code> lance un script avec les bonnes versions.</span></div>
+          <div class="term"><b>Graine (seed)</b><span>Un nombre fixé (42) qui rend le hasard reproductible : même graine, même résultat.</span></div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="partie-a">
+        <div class="section-head">
+          <span class="eyebrow">sct_generation/</span>
+          <h2>Partie A : fabriquer les sCT</h2>
+        </div>
+        <div class="prose">
+          <p>Le réseau utilisé est un <b>U-Net 2D</b> : on lui donne une coupe d'IRM, il dessine la coupe de CT correspondante. Il apprend en comparant ses dessins aux vrais CT des patients d'entraînement. Les quatre scripts se lancent dans l'ordre.</p>
+        </div>
+
+        <div class="subsection" id="split">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">make_split.py</span><span class="role">répartit les 180 patients en train, val et test</span></div>
+            <dl>
+              <dt>Lit</dt><dd>La liste des dossiers patients dans <code>SYNTHRAD_DIR</code> (<code>/home/student/DATA/SYNTHESIS/brain</code>).</dd>
+              <dt>Écrit</dt><dd><code>splits/task1_brain.csv</code>, avec pour chaque patient son centre hospitalier et son groupe.</dd>
+              <dt>À retenir</dt><dd>On répartit des <b>patients</b>, pas des coupes. Si les coupes d'un même patient étaient dans train et dans test, le réseau serait évalué sur des images presque identiques à celles qu'il a apprises, et ses résultats paraîtraient meilleurs qu'ils ne sont.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Le nom de chaque dossier patient se lit comme un code :</p>
+          </div>
+          <div class="idcode" aria-label="Décodage de l'identifiant 1BA001">
+            <div class="idpart"><span class="glyph">1</span><span class="what">tâche 1 : IRM → CT</span></div>
+            <div class="idpart"><span class="glyph">B</span><span class="what">région : brain (cerveau)</span></div>
+            <div class="idpart"><span class="glyph">A</span><span class="what">centre hospitalier A, B ou C</span></div>
+            <div class="idpart"><span class="glyph">001</span><span class="what">numéro du patient</span></div>
+          </div>
+          <div class="prose">
+            <p>Le script répartit <b>chaque centre séparément</b> (70 % train, 15 % val, 15 % test). Chaque groupe contient donc des patients des trois hôpitaux. Sans ça, un centre pourrait se retrouver entièrement dans le test, et le réseau serait jugé sur un scanner qu'il n'a jamais vu.</p>
+            <p>Le script refuse d'écraser un split existant : changer de découpage en cours de projet rendrait les anciens résultats incomparables avec les nouveaux.</p>
+          </div>
+        </div>
+
+        <div class="subsection" id="preprocess">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">preprocess.py</span><span class="role">ramène toutes les images sur une même échelle, une fois pour toutes</span></div>
+            <dl>
+              <dt>Lit</dt><dd>Pour chaque patient : <code>mr.nii.gz</code>, <code>ct.nii.gz</code> et <code>mask.nii.gz</code> (le masque du corps).</dd>
+              <dt>Écrit</dt><dd><code>work/cache/&lt;patient&gt;/source.npy</code>, <code>ct.npy</code> et <code>mask.npy</code>.</dd>
+              <dt>À retenir</dt><dd>Les <code>.nii.gz</code> sont compressés, donc lents à lire. Les <code>.npy</code> se lisent coupe par coupe, presque instantanément. On fait cette conversion une seule fois ; relancer le script saute les patients déjà faits.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Un réseau apprend mieux quand ses entrées et ses sorties sont entre 0 et 1. Les deux images sont donc ramenées dans cet intervalle, chacune à sa manière :</p>
+            <ul>
+              <li><b>L'IRM</b> n'a pas d'unité fixe : ses valeurs changent d'une machine à l'autre. On divise chaque volume par la valeur au-dessus de laquelle se trouvent les 0,5 % de voxels les plus brillants du corps. Tous les patients deviennent comparables.</li>
+              <li><b>Le CT</b> a une vraie unité, les HU. On garde la plage de −1024 à 3000 HU et on la ramène linéairement entre 0 et 1, comme sur la règle ci-dessous. On peut ainsi repasser en HU après la prédiction.</li>
+            </ul>
+          </div>
+          <figure>
+            <div class="diagram narrow">
+              <svg viewBox="0 0 900 150" role="img" aria-label="Règle des unités Hounsfield de −1024 à 3000, ramenées linéairement entre 0 et 1. Air vers −1000, graisse vers −100, eau à 0, os entre environ +300 et +1900.">
+                <defs>
+                  <linearGradient id="hu-grad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#000000"/>
+                    <stop offset="1" stop-color="#FFFFFF"/>
+                  </linearGradient>
+                </defs>
+                <line x1="45" y1="52" x2="45" y2="60" class="hu-tick"/>
+                <text x="40" y="46" class="d-lab">air −1000</text>
+                <line x1="218" y1="52" x2="218" y2="60" class="hu-tick"/>
+                <text x="216" y="46" text-anchor="end" class="d-lab">graisse −100</text>
+                <line x1="249" y1="52" x2="249" y2="60" class="hu-tick"/>
+                <text x="252" y="46" class="d-lab">eau 0</text>
+                <polyline points="310,58 310,52 636,52 636,58" class="d-line"/>
+                <text x="473" y="44" text-anchor="middle" class="d-lab">os ≈ +300 à +1900</text>
+
+                <rect x="40" y="60" width="820" height="26" fill="url(#hu-grad)" class="hu-bar"/>
+
+                <line x1="40" y1="86" x2="40" y2="94" class="hu-tick"/>
+                <line x1="249" y1="86" x2="249" y2="94" class="hu-tick"/>
+                <line x1="452" y1="86" x2="452" y2="94" class="hu-tick"/>
+                <line x1="656" y1="86" x2="656" y2="94" class="hu-tick"/>
+                <line x1="860" y1="86" x2="860" y2="94" class="hu-tick"/>
+                <text x="40" y="110" class="d-mono">−1024 HU</text>
+                <text x="249" y="110" text-anchor="middle" class="d-mono">0</text>
+                <text x="452" y="110" text-anchor="middle" class="d-mono">1000</text>
+                <text x="656" y="110" text-anchor="middle" class="d-mono">2000</text>
+                <text x="860" y="110" text-anchor="end" class="d-mono">3000 HU</text>
+                <text x="40" y="134" class="d-capmono">→ 0</text>
+                <text x="249" y="134" text-anchor="middle" class="d-capmono">0,25</text>
+                <text x="452" y="134" text-anchor="middle" class="d-capmono">0,50</text>
+                <text x="656" y="134" text-anchor="middle" class="d-capmono">0,75</text>
+                <text x="860" y="134" text-anchor="end" class="d-capmono">→ 1</text>
+              </svg>
+            </div>
+            <figcaption>La plage de CT conservée, de −1024 à 3000 HU, avec quelques repères de tissus. La ligne du bas donne la valeur après normalisation : c'est cette échelle de 0 à 1 que voit le réseau.</figcaption>
+          </figure>
+        </div>
+
+        <div class="subsection" id="train">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">train.py</span><span class="role">apprend à transformer une coupe d'IRM en coupe de CT</span></div>
+            <dl>
+              <dt>Lit</dt><dd>Les <code>.npy</code> des patients de <b>train</b> (pour apprendre) et de <b>val</b> (pour mesurer les progrès).</dd>
+              <dt>Écrit</dt><dd><code>work/runs/&lt;nom&gt;/checkpoints/epoch_001.pt</code>, <code>epoch_002.pt</code>… et <code>training_log.csv</code>.</dd>
+              <dt>Utilise</dt><dd><code>data.py</code> pour tirer les coupes, <code>model.py</code> pour construire le U-Net.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Une époque se déroule ainsi :</p>
+            <ol>
+              <li><code>data.py</code> tire au hasard 2000 coupes parmi les patients de train, et découpe dans chacune un carré de 256 × 256 pixels.</li>
+              <li>Par paquets de 16, le réseau prédit le CT à partir de l'IRM.</li>
+              <li>On mesure l'écart entre la prédiction et le vrai CT (perte L1 : la moyenne des différences en valeur absolue).</li>
+              <li>Le réseau ajuste ses paramètres pour réduire cet écart.</li>
+            </ol>
+            <p>Aux époques <code>1, 2, 5, 10, 20, 50, 100</code>, le script sauvegarde un <b>checkpoint</b> et calcule la MAE en HU sur les patients de val. C'est ce qui donne au banc d'essai sa variété : le checkpoint de l'époque 1 produit des sCT flous et peu réalistes, celui de l'époque 100 des sCT proches du vrai CT.</p>
+            <p>Le fichier <code>training_log.csv</code> contient une ligne par époque : <code>epoch</code>, <code>train_l1</code> (l'écart à l'entraînement), <code>val_mae_hu</code> (rempli seulement aux époques de checkpoint) et <code>duration_s</code>. Si la MAE de val baisse d'un checkpoint à l'autre, l'apprentissage se passe bien.</p>
+          </div>
+        </div>
+
+        <div class="subsection" id="predict">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">predict.py</span><span class="role">fabrique les sCT avec chaque checkpoint</span></div>
+            <dl>
+              <dt>Lit</dt><dd>Les checkpoints d'un run et les IRM des patients de test (ou de val avec <code>--split val</code>).</dd>
+              <dt>Écrit</dt><dd><code>work/runs/&lt;nom&gt;/predictions/test/epoch_005/1BA001/sct.nii.gz</code> : un sCT par checkpoint et par patient.</dd>
+              <dt>À retenir</dt><dd>Le sCT est enregistré en HU, avec exactement la même géométrie que l'IRM d'origine (taille, taille des voxels, position). On peut donc le superposer au vrai CT pour calculer les métriques.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Avec 27 patients de test et 7 checkpoints, on obtient 189 sCT de qualité variée : c'est la matière première du banc d'essai.</p>
+            <p>Le volume est prédit coupe par coupe. Comme le U-Net divise la taille de l'image par deux à quatre reprises, chaque coupe est d'abord complétée jusqu'à un multiple de 16 pixels, puis ce bord est retiré.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="partie-b">
+        <div class="section-head">
+          <span class="eyebrow">pipeline/</span>
+          <h2>Partie B : faire juger les sCT par les VLM</h2>
+        </div>
+
+        <div class="subsection" id="manager">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">vlm_manager.py</span><span class="role">télécharger, charger et décharger les VLM</span></div>
+            <dl>
+              <dt>Parle à</dt><dd>Ollama, sur la station (<code>127.0.0.1:11434</code>).</dd>
+              <dt>Commandes</dt><dd><code>list</code>, <code>ps</code>, <code>pull</code>, <code>load</code>, <code>unload</code>. Les mêmes fonctions sont utilisées par <code>benchmark.py</code>.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Un modèle peut se trouver à trois endroits. Il faut bien distinguer « installé » (sur le disque) et « chargé » (dans la mémoire du GPU, prêt à répondre).</p>
+          </div>
+          <figure>
+            <div class="diagram narrow">
+              <svg viewBox="0 0 860 190" role="img" aria-label="pull copie un modèle du registre ollama.com vers le disque ; load le copie du disque vers la VRAM avec keep_alive=-1 ; unload le retire de la VRAM avec keep_alive=0.">
+                <defs>
+                  <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-ink"/></marker>
+                </defs>
+                <rect x="20" y="50" width="160" height="80" rx="8" class="d-box"/>
+                <text x="100" y="82" text-anchor="middle" class="d-title">ollama.com</text>
+                <text x="100" y="104" text-anchor="middle" class="d-cap">registre public</text>
+
+                <rect x="340" y="50" width="180" height="80" rx="8" class="d-box"/>
+                <text x="430" y="78" text-anchor="middle" class="d-title">Disque de la station</text>
+                <text x="430" y="98" text-anchor="middle" class="d-cap">« installé » · cache partagé</text>
+                <text x="430" y="117" text-anchor="middle" class="d-capmono">voir : list</text>
+
+                <rect x="660" y="50" width="180" height="80" rx="8" class="d-box hl"/>
+                <text x="750" y="78" text-anchor="middle" class="d-title">VRAM du GPU</text>
+                <text x="750" y="98" text-anchor="middle" class="d-cap">« chargé » · prêt à répondre</text>
+                <text x="750" y="117" text-anchor="middle" class="d-capmono">voir : ps</text>
+
+                <line x1="180" y1="90" x2="338" y2="90" class="d-line" marker-end="url(#ah3)"/>
+                <text x="259" y="82" text-anchor="middle" class="d-lab">pull</text>
+
+                <line x1="520" y1="75" x2="658" y2="75" class="d-line" marker-end="url(#ah3)"/>
+                <text x="589" y="67" text-anchor="middle" class="d-lab">load · keep_alive=-1</text>
+                <line x1="660" y1="110" x2="522" y2="110" class="d-line" marker-end="url(#ah3)"/>
+                <text x="591" y="128" text-anchor="middle" class="d-lab">unload · keep_alive=0</text>
+              </svg>
+            </div>
+            <figcaption><code>pull</code> télécharge un modèle sur le disque (une seule fois, il y reste). <code>load</code> le met en VRAM et l'y garde jusqu'à ce qu'on le décharge (<code>keep_alive=-1</code>). <code>unload</code> libère la VRAM (<code>keep_alive=0</code>) et attend que la mémoire soit vraiment rendue.</figcaption>
+          </figure>
+          <div class="prose">
+            <p>Quatre modèles sont déjà installés par l'administrateur : <code>medgemma:latest</code>, <code>gemma4:latest</code>, <code>medgemma:27b</code> et <code>qwen3.8:27b</code>. Les six autres de la liste (<code>moondream</code>, <code>llava:7b</code>, <code>llava:13b</code>, <code>qwen3-vl:8b</code>, <code>minicpm-v:8b</code>, <code>qwen3-vl:30b</code>) se téléchargent avec <code>pull</code> ou avec l'option <code>--pull</code> du benchmark. Pour ajouter un modèle au benchmark, on ajoute son nom dans <code>MODELS</code>, dans <code>pipeline/config.py</code>.</p>
+            <p>Au chargement, le script affiche la VRAM occupée. Si un modèle ne tient pas entièrement sur le GPU, il prévient : une partie tourne alors sur le processeur, beaucoup plus lentement, ce qui fausserait les temps mesurés.</p>
+          </div>
+        </div>
+
+        <div class="subsection" id="judge">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">judge.py</span><span class="role">fait noter une image par un VLM</span></div>
+            <dl>
+              <dt>Envoie</dt><dd>Une image PNG et le prompt <code>realism_v1</code> défini dans <code>config.py</code>.</dd>
+              <dt>Reçoit</dt><dd>Une note de 0 à 100, une justification, et le temps de réponse.</dd>
+              <dt>À retenir</dt><dd>La forme de la réponse est <b>imposée</b> à Ollama par un schéma JSON (paramètre <code>format</code>). Le modèle ne peut pas répondre autre chose qu'un objet <code>{"score": …, "reason": "…"}</code>, même un petit modèle bavard.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Le prompt est en anglais, car les VLM y répondent généralement mieux. Il demande d'évaluer le réalisme anatomique de la coupe (anatomie plausible, contours nets, contraste os / tissus / air, absence d'artéfacts) et de donner une note de 0 (clairement irréaliste) à 100 (impossible à distinguer d'un vrai CT). Il ne contient aucune métrique ni aucun indice sur la vraie réponse.</p>
+            <p>Deux réglages rendent les réponses reproductibles : <code>TEMPERATURE = 0</code> (le modèle choisit toujours la réponse la plus probable) et <code>SEED = 42</code>.</p>
+            <p>Pour tester une autre formulation, on ajoute une nouvelle entrée dans <code>PROMPTS</code> au lieu de modifier <code>realism_v1</code>. Le nom du prompt est enregistré avec chaque note, ce qui permet de comparer les formulations (biais de prompt).</p>
+          </div>
+        </div>
+
+        <div class="subsection" id="benchmark">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">benchmark.py</span><span class="role">fait noter toutes les images par tous les modèles</span></div>
+            <dl>
+              <dt>Lit</dt><dd>Un fichier <code>testbench.csv</code> avec deux colonnes : <code>item_id</code> (un identifiant unique) et <code>image_path</code> (le chemin du PNG).</dd>
+              <dt>Écrit</dt><dd><code>Synthesis/results/judgements.csv</code>, une ligne par note, ajoutée au fur et à mesure.</dd>
+              <dt>À retenir</dt><dd>Le benchmark ne lit <b>que</b> ces deux colonnes. Si <code>testbench.csv</code> contient aussi les métriques, elles sont ignorées : le VLM ne peut pas les voir.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Pour chaque modèle de la liste, dans l'ordre :</p>
+            <ol>
+              <li>s'il n'est pas installé : le télécharger avec <code>--pull</code>, sinon le sauter avec un message ;</li>
+              <li>prévenir si un autre modèle est déjà en mémoire (quelqu'un d'autre l'utilise peut-être) ;</li>
+              <li>le charger en VRAM ;</li>
+              <li>lui faire noter chaque image et écrire la ligne dans le CSV aussitôt ;</li>
+              <li>le décharger, même après une erreur ou un Ctrl+C, puis passer au suivant.</li>
+            </ol>
+            <p>Si une image pose problème (délai dépassé, réponse invalide), l'erreur est notée dans la colonne <code>error</code> et le benchmark continue. Si le script s'arrête, il suffit de le relancer avec la même commande : les notes déjà obtenues sont sautées.</p>
+          </div>
+          <div class="code">
+            <span class="where">Format de judgements.csv · exemple inventé</span>
+<pre><code>model,prompt_name,item_id,score,reason,latency_s,vram_gb,error,timestamp
+medgemma:latest,realism_v1,1BA005_epoch_001,18,"Blurred bone edges, no gyri",2.1,5.4,,2026-11-12T22:14:03
+medgemma:latest,realism_v1,1BA005_epoch_100,81,"Plausible anatomy, sharp skull",2.0,5.4,,2026-11-12T22:14:05</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="tuto">
+        <div class="section-head">
+          <span class="eyebrow">Tutoriel</span>
+          <h2>Tutoriel pas à pas</h2>
+        </div>
+        <div class="prose">
+          <p>Les étapes 1 à 4 ne se font qu'une fois. Ensuite, on suit la chaîne. Chaque étape indique sur quelle machine taper la commande.</p>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <div class="step-body">
+              <h3>Envoyer le code sur GitHub <span class="where-tag">ton PC</span></h3>
+              <p>Tant que le dossier <code>Synthesis/</code> n'est pas poussé, la station ne peut pas le récupérer.</p>
+              <div class="code nolabel">
+<pre><code>cd "C:/Users/agent/Documents/IMT/Commande-Entreprise/Code/Synthese/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration"
+git add Synthesis
+git commit -m "Volet synthèse : pipeline VLM juge, génération de sCT, environnement uv"
+git push</code></pre>
+              </div>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Se connecter à la station <span class="where-tag">ton PC</span></h3>
+              <p>Tailscale doit être connecté. Dans VS Code, l'extension « Remote - SSH » permet aussi d'ouvrir directement les dossiers de la station.</p>
+              <div class="code nolabel">
+<pre><code>ssh student@100.106.248.35</code></pre>
+              </div>
+              <p class="expect">Tu dois voir l'invite <b>student@latim5090:~$</b>. Toutes les commandes suivantes, sauf indication contraire, se tapent là.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Récupérer le code <span class="where-tag">station · une fois</span></h3>
+              <p>Un seul clone pour toute l'équipe : prévenez-vous avant d'en créer un.</p>
+              <div class="code nolabel">
+<pre><code>mkdir -p ~/projects &amp;&amp; cd ~/projects
+git clone https://github.com/PierreGUTTIEREZ/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration.git
+cd Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis</code></pre>
+              </div>
+              <p>Les fois suivantes, pour récupérer les dernières modifications :</p>
+              <div class="code nolabel">
+<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
+git pull</code></pre>
+              </div>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Installer l'environnement Python <span class="where-tag">station · une fois</span></h3>
+              <p><code>uv sync</code> lit <code>pyproject.toml</code> et <code>uv.lock</code>, puis installe exactement les mêmes versions pour tout le monde, dont le PyTorch compatible avec la RTX 5090. À relancer seulement si ces fichiers changent.</p>
+              <div class="code nolabel">
+<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
+uv sync
+uv run python -c "import torch; print(torch.cuda.is_available())"</code></pre>
+              </div>
+              <p class="expect">La dernière commande doit afficher <b>True</b>. Si elle affiche <code>False</code>, voir le <a href="#depannage">dépannage</a>.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Vérifier les données <span class="where-tag">station</span></h3>
+              <div class="code nolabel">
+<pre><code>ls /home/student/DATA/SYNTHESIS/brain | head
+ls /home/student/DATA/SYNTHESIS/brain/1BA001</code></pre>
+              </div>
+              <p class="expect">Tu dois voir des dossiers <b>1BA001, 1BA005…</b>, puis les trois fichiers <b>ct.nii.gz, mask.nii.gz, mr.nii.gz</b>. Si les noms diffèrent, il faut adapter <code>SYNTHRAD_DIR</code> ou les noms de fichiers dans <code>sct_generation/config.py</code>.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Découper les patients <span class="where-tag">station</span></h3>
+              <div class="code nolabel">
+<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation
+uv run python make_split.py</code></pre>
+              </div>
+              <p class="expect">Avec les mêmes 180 patients que la copie de ton PC, tu dois voir <b>train 126, val 27, test 27</b>, avec les centres A, B et C dans chaque groupe.</p>
+              <p>Ce fichier doit être partagé avec l'équipe. Comme on ne pousse pas depuis la station, on le rapatrie sur le PC pour le commiter :</p>
+              <div class="code">
+                <span class="where">Sur ton PC, depuis le dossier du dépôt</span>
+<pre><code>scp student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation/splits/task1_brain.csv Synthesis/sct_generation/splits/
+git add Synthesis/sct_generation/splits/task1_brain.csv
+git commit -m "Split train/val/test du cerveau"
+git push</code></pre>
+              </div>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Pré-traiter les volumes <span class="where-tag">station</span></h3>
+              <div class="code nolabel">
+<pre><code>uv run python preprocess.py</code></pre>
+              </div>
+              <p class="expect">Une ligne par patient, de <b>[1/180]</b> à <b>[180/180]</b>, puis « Pré-traitement terminé ». En cas d'interruption, relancer la même commande reprend là où elle s'était arrêtée.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Lancer l'entraînement en arrière-plan <span class="where-tag">station</span></h3>
+              <p>L'entraînement dure longtemps. Lancé directement dans le terminal, il s'arrêterait dès que la connexion SSH se coupe. On le lance donc dans une session <code>tmux</code>, qui continue même si tu te déconnectes.</p>
+              <p>Avant de lancer, vérifie que personne n'utilise déjà le GPU :</p>
+              <div class="code nolabel">
+<pre><code>nvidia-smi        <span class="c"># mémoire GPU utilisée et programmes en cours</span>
+ollama ps         <span class="c"># modèles Ollama chargés</span></code></pre>
+              </div>
+              <div class="code nolabel">
+<pre><code>tmux new -s sct                                  <span class="c"># ouvre une session nommée « sct »</span>
+uv run python train.py --run unet_baseline
+<span class="c"># pour quitter la session sans l'arrêter : Ctrl+B, puis D</span>
+<span class="c"># pour y revenir plus tard :</span>
+tmux attach -t sct</code></pre>
+              </div>
+              <p>Si <code>tmux</code> n'est pas installé (« command not found »), on utilise <code>nohup</code>. L'option <code>-u</code> fait apparaître les messages immédiatement dans le fichier de log.</p>
+              <div class="code nolabel">
+<pre><code>nohup uv run python -u train.py --run unet_baseline &gt; train.log 2&gt;&amp;1 &amp;
+tail -f train.log        <span class="c"># suivre l'avancement ; Ctrl+C arrête seulement l'affichage</span></code></pre>
+              </div>
+              <p class="expect">Une ligne par époque, par exemple <b>Époque 5/100 L1 0.0213 (41.2 s) checkpoint sauvegardé, MAE val 98.4 HU</b> (valeurs inventées). Le nom du run doit être nouveau : le script refuse d'écraser un run existant.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Suivre la qualité de l'apprentissage <span class="where-tag">station</span></h3>
+              <div class="code nolabel">
+<pre><code>cat work/runs/unet_baseline/training_log.csv
+ls work/runs/unet_baseline/checkpoints</code></pre>
+              </div>
+              <p class="expect">La colonne <b>val_mae_hu</b> doit baisser d'un checkpoint à l'autre. Les checkpoints apparaissent au fil de l'entraînement : <b>epoch_001.pt, epoch_002.pt, epoch_005.pt…</b></p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Générer les sCT <span class="where-tag">station</span></h3>
+              <div class="code nolabel">
+<pre><code>uv run python predict.py --run unet_baseline               <span class="c"># patients de test, tous les checkpoints</span>
+uv run python predict.py --run unet_baseline --split val   <span class="c"># patients de val, pour régler le juge</span></code></pre>
+              </div>
+              <p class="expect">Les sCT apparaissent dans <b>work/runs/unet_baseline/predictions/test/epoch_XXX/&lt;patient&gt;/sct.nii.gz</b>. Les sCT déjà générés sont sautés si on relance.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Faire noter une image par un VLM <span class="where-tag">station</span></h3>
+              <p>Le script qui transforme les sCT en PNG n'existe pas encore. Pour tester la partie VLM dès maintenant, on peut utiliser n'importe quelle image PNG copiée depuis ton PC :</p>
+              <div class="code">
+                <span class="where">Sur ton PC</span>
+<pre><code>scp coupe.png student@100.106.248.35:~/</code></pre>
+              </div>
+              <div class="code">
+                <span class="where">Sur la station</span>
+<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/pipeline
+uv run python vlm_manager.py list                     <span class="c"># modèles installés</span>
+uv run python vlm_manager.py ps                       <span class="c"># modèles chargés en ce moment</span>
+uv run python judge.py medgemma:latest ~/coupe.png</code></pre>
+              </div>
+              <p class="expect">Tu dois voir <b>Score</b>, <b>Raison</b> et <b>Temps</b>. Le premier appel est plus long car il inclut le chargement du modèle. Le script décharge ensuite le modèle s'il n'était pas déjà en mémoire avant le test.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Lancer le benchmark <span class="where-tag">station · plus tard</span></h3>
+              <p>Cette étape demande le fichier <code>testbench.csv</code>, qui sera produit par le futur script de rendu. On commence par un seul modèle rapide, puis on lance tout, de préférence aux heures creuses et dans <code>tmux</code>.</p>
+              <div class="code nolabel">
+<pre><code>uv run python benchmark.py --testbench chemin/testbench.csv --models medgemma:latest
+uv run python benchmark.py --testbench chemin/testbench.csv            <span class="c"># modèles installés</span>
+uv run python benchmark.py --testbench chemin/testbench.csv --pull     <span class="c"># + télécharge les manquants</span></code></pre>
+              </div>
+              <p>Avant un <code>--pull</code> complet (environ 45 Go pour les six modèles manquants), vérifie la place disque avec <code>df -h /</code>.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Récupérer les résultats <span class="where-tag">ton PC</span></h3>
+              <div class="code nolabel">
+<pre><code>scp student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/judgements.csv Synthesis/results/</code></pre>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="suite">
+        <div class="section-head">
+          <span class="eyebrow">Feuille de route</span>
+          <h2>Ce qui reste à faire</h2>
+        </div>
+        <div class="prose">
+          <ol>
+            <li><b>Métriques et rendu PNG.</b> Pour chaque sCT : calculer MAE, PSNR et SSIM contre le vrai CT, choisir des coupes, les enregistrer en PNG et écrire <code>testbench.csv</code>. Pour MedGemma, Google recommande de coder le CT en couleur avec trois fenêtres de HU : rouge de −1024 à 1024, vert de −135 à 215, bleu de 0 à 80, et des images de 896 × 896 pixels.</li>
+            <li><b>Mise au point du juge sur val.</b> Comparer plusieurs prompts et styles de rendu sur les sCT de val, et garder le meilleur. Ne jamais faire ces réglages en regardant les résultats du test.</li>
+            <li><b>Benchmark final sur test</b> avec tous les modèles.</li>
+            <li><b>Analyse.</b> Corrélations de Spearman et de Pearson entre notes des VLM et métriques, AUROC pour séparer les sCT acceptables des autres, temps et VRAM par modèle : c'est le leaderboard.</li>
+            <li><b>Filtrage.</b> Garder les sCT jugés bons par le meilleur VLM et mesurer le gain, comparé à un filtrage par la vraie métrique et à un filtrage au hasard.</li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="depannage">
+        <div class="section-head">
+          <span class="eyebrow">Quand ça bloque</span>
+          <h2>Dépannage</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Message ou symptôme</th><th>Cause</th><th>Solution</th></tr></thead>
+            <tbody>
+              <tr><td>« Impossible de joindre Ollama »</td><td>Script lancé sur ton PC, ou service Ollama en redémarrage.</td><td>Lancer le script sur la station. Si c'est déjà le cas, réessayer un peu plus tard, puis prévenir l'administrateur.</td></tr>
+              <tr><td><code>torch.cuda.is_available()</code> affiche <code>False</code></td><td>PyTorch installé dans sa version sans GPU, souvent par un <code>pip install</code>.</td><td>Relancer <code>uv sync</code> depuis <code>Synthesis/</code> et toujours lancer les scripts avec <code>uv run</code>.</td></tr>
+              <tr><td>« Dossier introuvable »</td><td><code>SYNTHRAD_DIR</code> ne pointe pas vers le bon dossier.</td><td>Vérifier le chemin avec <code>ls</code> et corriger <code>sct_generation/config.py</code>.</td></tr>
+              <tr><td>« … introuvable : lancer d'abord make_split.py »</td><td>Le split n'existe pas encore.</td><td>Lancer <code>make_split.py</code> (étape 6).</td></tr>
+              <tr><td>« … existe déjà »</td><td>Split ou run déjà créé ; le script refuse d'écraser.</td><td>Pour un run : choisir un autre nom avec <code>--run</code>. Pour le split : ne le supprimer qu'en accord avec l'équipe.</td></tr>
+              <tr><td>« … n'est pas installé, on passe »</td><td>Modèle absent du cache Ollama.</td><td>Relancer avec <code>--pull</code>, ou <code>vlm_manager.py pull &lt;modèle&gt;</code>.</td></tr>
+              <tr><td>« Attention : … Go sont en RAM (CPU) »</td><td>Le modèle ne tient pas entièrement en VRAM, souvent parce qu'un autre programme occupe le GPU.</td><td>Vérifier <code>nvidia-smi</code> et <code>ollama ps</code> ; relancer plus tard. Les temps mesurés pendant ce run ne sont pas fiables.</td></tr>
+              <tr><td>L'entraînement s'arrête quand je ferme le terminal</td><td>Le programme était attaché à la connexion SSH.</td><td>Le lancer dans <code>tmux</code> ou avec <code>nohup</code> (étape 8).</td></tr>
+              <tr><td>« CUDA out of memory » pendant l'entraînement</td><td>Le GPU est déjà occupé, par exemple par un VLM chargé.</td><td>Vérifier <code>nvidia-smi</code>, attendre qu'il se libère, ou réduire <code>BATCH_SIZE</code> dans <code>sct_generation/config.py</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <section id="regles">
+        <div class="section-head">
+          <span class="eyebrow">À garder en tête</span>
+          <h2>Les règles d'or</h2>
+        </div>
+        <div class="callout warn">
+          <ul class="golden">
+            <li><b>Le VLM ne voit jamais la vraie réponse.</b><span>Ni le vrai CT, ni les métriques, ni dans l'image ni dans le prompt. C'est ce qui rend le benchmark valable.</span></li>
+            <li><b>Le test ne sert qu'à la fin.</b><span>Tous les réglages (hyperparamètres, prompts, rendu) se font sur val.</span></li>
+            <li><b>Le GPU et le compte sont partagés.</b><span>On ne décharge pas le modèle d'un autre, on ne supprime pas un modèle qu'on n'a pas téléchargé, on ne stocke aucun identifiant sur la station.</span></li>
+            <li><b>Aucune donnée patient dans git.</b><span>Le dossier <code>work/</code> est exclu automatiquement. Seuls le code, le split et les résultats agrégés sont versionnés.</span></li>
+            <li><b>Tout est reproductible.</b><span>Graine 42, température 0, versions figées par <code>uv.lock</code>, chaque note enregistrée avec le modèle et le prompt utilisés.</span></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>Guide du dossier <code>Synthesis/</code> du dépôt Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration · novembre 2026</footer>
+</div>
+
+<script>
+  document.querySelectorAll(".code").forEach(function (block) {
+    var pre = block.querySelector("pre");
+    if (!pre || pre.classList.contains("tree")) return;
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "copy";
+    button.textContent = "Copier";
+    button.addEventListener("click", function () {
+      var text = pre.innerText.replace(/\n$/, "");
+      var done = function (label) {
+        button.textContent = label;
+        setTimeout(function () { button.textContent = "Copier"; }, 1600);
+      };
+      var selectText = function () {
+        var range = document.createRange();
+        range.selectNodeContents(pre);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        done("Ctrl+C pour copier");
+      };
+      try {
+        navigator.clipboard.writeText(text).then(function () { done("Copié"); }, selectText);
+      } catch (error) {
+        selectText();
+      }
+    });
+    block.appendChild(button);
+  });
+</script>
+
+</body></html>

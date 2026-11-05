@@ -1,0 +1,23 @@
+[project]
+name = "synthesis-vlm-judge"
+version = "0.1.0"
+description = "Volet synthèse : génération de sCT et benchmark de VLM locaux comme juges"
+requires-python = ">=3.11"
+dependencies = [
+    "monai",
+    "numpy",
+    "ollama>=0.6",
+    "pydantic>=2",
+    "simpleitk",
+    "torch",
+]
+
+# Sur la station (Linux), PyTorch doit être compilé pour CUDA 13 afin de reconnaître
+# la RTX 5090. Sur un portable Windows, on garde la version standard (CPU).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu130", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

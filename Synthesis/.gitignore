@@ -1,0 +1,5 @@
+__pycache__/
+.venv/
+
+# Volumes pré-traités, checkpoints et sCT : dérivés d'images patient, jamais versionnés.
+sct_generation/work/

@@ -8,18 +8,18 @@ Si un autre modèle est en mémoire, un avertissement s'affiche ; Ollama libére
 si besoin, mais les temps mesurés peuvent en être faussés. Mieux vaut lancer les longs
 benchmarks aux heures creuses.
 
-Format du CSV du banc d'essai (fourni avec les données) :
+Format du CSV du banc d'essai (produit par sct_generation/make_testbench.py) :
 
-    item_id,image_path
-    1PA001_epoch05_slice060,renders/1PA001_epoch05_slice060.png
-    1PA001_epoch50_slice060,renders/1PA001_epoch50_slice060.png
+    item_id,image_path,...
+    1BA001_unet_baseline-epoch_005_z072_gray,renders/1BA001_unet_baseline-epoch_005_z072_gray.png,...
+    1BA001_fedsynth-li_z072_gray,renders/1BA001_fedsynth-li_z072_gray.png,...
 
     item_id     identifiant unique de l'image
     image_path  chemin du PNG, absolu ou relatif au dossier du CSV
 
-Le fichier peut contenir d'autres colonnes (MAE, SSIM, gamma...) : elles sont ignorées ici,
+Le fichier contient d'autres colonnes (MAE, PSNR, SSIM...) : elles sont ignorées ici,
 car le VLM ne doit jamais voir les métriques. On rattache les scores aux métriques plus tard,
-lors de l'analyse, grâce à item_id.
+dans analyze.py, grâce à item_id.
 
 Le CSV de résultats est écrit au fur et à mesure. Si le script s'arrête en route, on le relance
 avec le même fichier de sortie et les jugements déjà réussis sont sautés. Les lignes en erreur
@@ -157,6 +157,7 @@ def run_benchmark(testbench_csv, models, prompt_name, results_csv, pull_missing)
     print(f"{len(items)} images, {len(models)} modèles, prompt '{prompt_name}'.")
     print(f"Résultats : {results_csv}\n")
 
+    failed = []
     for model in models:
         model = full_name(model)
 
@@ -169,10 +170,19 @@ def run_benchmark(testbench_csv, models, prompt_name, results_csv, pull_missing)
             if not pull_missing:
                 print(f"{model} n'est pas installé, on passe (relancer avec --pull pour le télécharger).\n")
                 continue
-            pull_model(client, model)
 
-        run_model(client, model, todo, prompt_name, results_csv)
+        # Un modèle qui ne se télécharge pas ou ne se charge pas (nom inconnu, pas assez de
+        # VRAM...) ne doit pas empêcher de tester les suivants. Ctrl+C arrête tout, lui.
+        try:
+            if model not in installed:
+                pull_model(client, model)
+            run_model(client, model, todo, prompt_name, results_csv)
+        except Exception as error:
+            failed.append(model)
+            print(f"{model} : ERREUR {type(error).__name__}: {error}\nOn passe au modèle suivant.\n")
 
+    if failed:
+        print(f"Modèles en échec : {', '.join(failed)}. Relancer la même commande pour réessayer.")
     print("Benchmark terminé.")
 
 

@@ -75,7 +75,7 @@ Hypothèses à tester :
 
 **Objectif :** juger le **réalisme** du sCT et sa **pertinence clinique**, puis corréler ce jugement avec les métriques image et dosimétriques.
 
-1. Générer ou récupérer des pseudo-CT de qualité variée : modèles à différents stades d'entraînement, cas d'échec volontaires.
+1. Générer ou récupérer des pseudo-CT de qualité variée : un U-Net entraîné par nos soins, gardé à différents stades d'entraînement, et trois modèles pré-entraînés publiés (FedSynthCT-Brain : Li, Fu, Spadea, via [SlicerModalityConverter](https://github.com/ciroraggio/SlicerModalityConverter)).
 2. Calculer les métriques image : **MAE, PSNR, SSIM**.
 3. Calculer les métriques aval : **gamma analysis (2 %/2 mm)**, écarts de **DVH**, D<sub>max</sub>, D<sub>mean</sub>.
 4. Faire juger chaque sCT par les VLM (score 0–100 et justification).
@@ -222,16 +222,15 @@ Ils sont exécutés en local via [Ollama](https://ollama.com) sur une **RTX 5090
 
 ### 1. Environnement Python
 
+L'environnement du volet Synthèse est géré par [`uv`](https://docs.astral.sh/uv/) : `Synthesis/pyproject.toml` liste les bibliothèques et `Synthesis/uv.lock` fige leurs versions, dont le PyTorch compilé pour CUDA 13 qu'exige la RTX 5090. Pas de `pip install` à la main, qui installerait un PyTorch sans GPU.
+
 ```bash
-conda create -n vlmlab python=3.11 -y
-conda activate vlmlab
-
-pip install SimpleITK nibabel monai itk-elastix \
-            numpy scipy scikit-learn pandas matplotlib pillow \
-            ollama pydantic
-
-nvidia-smi    # vérifier que le GPU est visible
+cd Synthesis
+uv sync                                                              # installe l'environnement
+uv run python -c "import torch; print(torch.cuda.is_available())"   # doit afficher True
 ```
+
+Le détail, commande par commande, est dans [`Synthesis/Mode d'emploi du volet Synthèse.html`](Synthesis/).
 
 ### 2. Ollama et les modèles
 
@@ -283,26 +282,19 @@ ollama run moondream "Describe this image." ./renders/example.png
 
 ## Organisation du dépôt
 
-> Structure **prévue**, à ajuster au fil du projet.
-
 ```
 .
 ├── README.md
-├── requirements.txt          # dépendances figées (reproductibilité)
-├── configs/                  # paramètres des expériences (modèles, prompts, seuils)
-├── notebooks/
-│   └── 01_prise_en_main.ipynb  # chargement, rééchantillonnage, TRE, DVH
-├── src/
-│   ├── data/                 # chargement SynthRAD / DIR-Lab / COPDgene / POPI
-│   ├── synthesis/            # génération sCT + métriques (MAE, PSNR, SSIM, gamma, DVH)
-│   ├── registration/         # oracle conventionnel + TRE, Jacobien, cohérence inverse
-│   ├── rendering/            # rendu PNG lisible par les VLM
-│   ├── judge/                # prompts, schémas JSON, appels Ollama
-│   └── analysis/             # corrélations, AUROC, leaderboard, figures
-├── results/                  # CSV de logs et figures (sans données patient)
-├── docs/                     # fiches de lecture, carnet de bord, rapport
-└── data/                     # ⚠️ non versionné (.gitignore)
+├── Synthesis/                    # volet 1 : synthèse IRM → CT
+│   ├── Mode d'emploi du volet Synthèse.html   # guide complet et tutoriel pas à pas
+│   ├── pyproject.toml, uv.lock   # environnement Python (uv), versions figées
+│   ├── sct_generation/           # sCT (U-Net + modèles pré-entraînés), métriques, rendu PNG
+│   ├── pipeline/                 # appels Ollama, benchmark des VLM, analyse (leaderboard)
+│   └── results/                  # notes des VLM et résultats agrégés (sans données patient)
+└── Registration/                 # volet 2 : recalage déformable du poumon (à venir)
 ```
+
+Les données et tout ce qui en est dérivé (volumes pré-traités, checkpoints, sCT, PNG) restent sur la station, dans des dossiers `work/` exclus de git.
 
 ---
 
@@ -358,6 +350,7 @@ ollama run moondream "Describe this image." ./renders/example.png
 - Chen *et al.*, « Large-Scale Label Quality Assessment for Medical Segmentation via a Vision-Language Judge and Synthetic Data » (SegAE), *ISBI 2026*, [arXiv:2601.14406](https://arxiv.org/abs/2601.14406).
 - Hering *et al.*, « Learn2Reg », *IEEE TMI*, 2023.
 - Huijben *et al.*, « SynthRAD2023 challenge report », *Medical Image Analysis*, 2024.
+- Raggio *et al.*, « FedSynthCT-Brain: A federated learning framework for multi-institutional brain MRI-to-CT synthesis », *Computers in Biology and Medicine*, 2025, [doi:10.1016/j.compbiomed.2025.110160](https://doi.org/10.1016/j.compbiomed.2025.110160). Modèles Li, Fu et Spadea utilisés via [SlicerModalityConverter](https://github.com/ciroraggio/SlicerModalityConverter) (usage recherche uniquement).
 - Menze *et al.*, « The Multimodal Brain Tumor Image Segmentation Benchmark (BraTS) », *IEEE TMI*, 2015.
 
 **Outils :** [MONAI](https://monai.io) · [SimpleITK](https://simpleitk.org) · [Ollama](https://ollama.com) · [itk-elastix](https://github.com/InsightSoftwareConsortium/ITKElastix)

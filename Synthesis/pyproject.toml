@@ -4,10 +4,15 @@ version = "0.1.0"
 description = "Volet synthèse : génération de sCT et benchmark de VLM locaux comme juges"
 requires-python = ">=3.11"
 dependencies = [
+    "matplotlib",
     "monai",
     "numpy",
     "ollama>=0.6",
+    "pandas",
+    "pillow",
     "pydantic>=2",
+    "scikit-image",
+    "scipy",
     "simpleitk",
     "torch",
 ]

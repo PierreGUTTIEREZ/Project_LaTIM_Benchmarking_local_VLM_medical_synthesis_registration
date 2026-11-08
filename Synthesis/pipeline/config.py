@@ -46,6 +46,11 @@ MODELS = [
 TEMPERATURE = 0
 SEED = 42
 
+# Nombre maximal de tokens générés par réponse. Une réponse normale en fait moins de 200 ;
+# le plafond évite qu'un petit modèle qui se met à répéter la même phrase (ça arrive à
+# température 0) bloque une image pendant des minutes. Une réponse coupée est notée en erreur.
+NUM_PREDICT = 2048
+
 # --- Prompts ----------------------------------------------------------------
 
 # On garde chaque formulation sous un nom, et ce nom est écrit dans le CSV
@@ -67,10 +72,36 @@ DEFAULT_PROMPT = "realism_v1"
 
 # --- Fichiers ---------------------------------------------------------------
 
-# Le CSV du banc d'essai sera fourni plus tard avec les données
-# (voir le format attendu dans benchmark.py). En attendant, on le passe
-# en argument avec --testbench.
+# Le banc d'essai est produit par sct_generation/make_testbench.py, par exemple
+# ../sct_generation/work/testbench/val/gray/testbench.csv. On le passe toujours
+# explicitement avec --testbench : ainsi on ne lance jamais le test par mégarde
+# (le test ne sert qu'à la fin, tous les réglages se font sur val).
 TESTBENCH_CSV = None
 
 RESULTS_DIR = SYNTHESIS_DIR / "results"
 DEFAULT_RESULTS_CSV = RESULTS_DIR / "judgements.csv"
+
+# --- Analyse (analyze.py) -----------------------------------------------------
+
+ANALYSIS_DIR = RESULTS_DIR / "analysis"
+
+# Métrique de référence du leaderboard. On prend celle de la coupe rendue, puisque c'est
+# ce que le VLM voit (les colonnes du volume entier sont aussi analysées dans correlations.csv).
+TARGET_METRIC = "mae_hu_slice"
+
+# Métriques où « plus bas = meilleur ». On change le signe de leurs corrélations pour que,
+# dans tous les tableaux, une valeur proche de +1 veuille dire « le VLM donne les meilleures
+# notes aux meilleurs sCT », et une valeur proche de 0 « le VLM note au hasard ».
+LOWER_IS_BETTER = {"mae_hu", "mae_hu_slice"}
+
+# AUROC : un sCT est « acceptable » si sa MAE sur la coupe est sous ce seuil (en HU).
+# L'AUROC mesure si le VLM sépare les acceptables des autres (1 = parfait, 0,5 = hasard).
+ACCEPTABLE_METRIC = "mae_hu_slice"
+ACCEPTABLE_THRESHOLD = 100
+
+# Intervalles de confiance à 95 % par bootstrap sur les patients : on retire des patients
+# au hasard (avec remise) et on recalcule la corrélation, BOOTSTRAP_SAMPLES fois.
+BOOTSTRAP_SAMPLES = 1000
+
+# Filtrage : part des images gardées quand on ne garde que les mieux notées.
+KEEP_FRACTION = 0.5

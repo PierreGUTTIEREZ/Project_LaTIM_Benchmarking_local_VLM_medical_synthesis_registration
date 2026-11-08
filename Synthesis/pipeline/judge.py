@@ -11,6 +11,7 @@ Test rapide sur une image :
 
 import argparse
 import time
+from pathlib import Path
 
 from pydantic import BaseModel, Field
 
@@ -36,11 +37,13 @@ def judge_image(client, model, image_path, prompt):
         model=model,
         messages=[{"role": "user", "content": prompt, "images": [str(image_path)]}],
         format=Judgement.model_json_schema(),
-        options={"temperature": config.TEMPERATURE, "seed": config.SEED},
+        options={"temperature": config.TEMPERATURE, "seed": config.SEED, "num_predict": config.NUM_PREDICT},
         keep_alive=-1,  # sans ça, Ollama remettrait le délai de déchargement à 5 minutes
     )
     latency_s = time.perf_counter() - start
 
+    if response.done_reason == "length":
+        raise ValueError(f"réponse coupée après {config.NUM_PREDICT} tokens (voir NUM_PREDICT dans config.py)")
     judgement = Judgement.model_validate_json(response.message.content)
     return {"score": judgement.score, "reason": judgement.reason, "latency_s": round(latency_s, 2)}
 
@@ -52,11 +55,17 @@ def main():
     parser.add_argument("--prompt", default=config.DEFAULT_PROMPT, choices=config.PROMPTS)
     args = parser.parse_args()
 
+    # Ollama prendrait un chemin inexistant pour une image encodée en base64 et renverrait
+    # une erreur peu claire : on vérifie avant.
+    if not Path(args.image).is_file():
+        raise SystemExit(f"Image introuvable : {args.image}")
+
+    model = full_name(args.model)
     client = get_client()
     check_server(client)
-    was_loaded = full_name(args.model) in loaded_models(client)
+    was_loaded = model in loaded_models(client)
 
-    result = judge_image(client, args.model, args.image, config.PROMPTS[args.prompt])
+    result = judge_image(client, model, args.image, config.PROMPTS[args.prompt])
     print(f"Score  : {result['score']}/100")
     print(f"Raison : {result['reason']}")
     print(f"Temps  : {result['latency_s']} s (chargement du modèle compris s'il n'était pas en mémoire)")
@@ -64,7 +73,7 @@ def main():
     # judge_image garde le modèle en mémoire (keep_alive=-1). Pour un simple test, on rend
     # le GPU partagé dans l'état où on l'a trouvé.
     if not was_loaded:
-        unload_model(client, args.model)
+        unload_model(client, model)
 
 
 if __name__ == "__main__":

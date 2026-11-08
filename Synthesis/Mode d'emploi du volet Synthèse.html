@@ -132,6 +132,7 @@ code {
   white-space: nowrap;
 }
 .chip.todo { border-style: dashed; border-color: var(--muted); background: transparent; color: var(--muted); }
+.chip.new { border-color: var(--amber); background: var(--amber-soft); color: var(--amber); }
 
 /* Mise en page principale */
 .layout { display: grid; gap: 40px; margin-top: 40px; }
@@ -298,14 +299,14 @@ td.num { font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-si
 .step-body h3 { padding-top: 5px; }
 .step-body > p { max-width: 66ch; }
 .expect { font-size: 0.92rem; color: var(--muted); max-width: 66ch; }
-.expect b { color: var(--ink); font-weight: 600; }
+.expect b { color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
 .where-tag { font-family: var(--f-mono); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--rule); color: var(--muted); margin-left: 8px; vertical-align: 3px; white-space: nowrap; }
 
 .golden { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 .golden li { display: flex; flex-direction: column; gap: 2px; max-width: 70ch; }
 .golden b { font-weight: 600; }
 
-footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--step--1); }
+footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--muted); font-size: var(--step--1); overflow-wrap: anywhere; }
 </style>
 
 <div class="wrap">
@@ -327,10 +328,17 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
         </div>
       </div>
       <div class="status-group">
+        <span class="eyebrow">Nouveau · testé sur données factices, à valider sur la station</span>
+        <div class="chips">
+          <span class="chip new">modèles pré-entraînés Li, Fu, Spadea</span>
+          <span class="chip new">métriques + rendu PNG</span>
+          <span class="chip new">analyse des corrélations</span>
+        </div>
+      </div>
+      <div class="status-group">
         <span class="eyebrow">À venir</span>
         <div class="chips">
-          <span class="chip todo">métriques + rendu PNG</span>
-          <span class="chip todo">analyse des corrélations</span>
+          <span class="chip todo">métriques de dose (gamma, DVH)</span>
         </div>
       </div>
     </div>
@@ -350,10 +358,13 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
         <li class="sub"><a href="#preprocess">preprocess.py</a></li>
         <li class="sub"><a href="#train">train.py</a></li>
         <li class="sub"><a href="#predict">predict.py</a></li>
+        <li class="sub"><a href="#pretrained">pretrained.py</a></li>
+        <li class="sub"><a href="#testbench">make_testbench.py</a></li>
         <li><a href="#partie-b">Partie B : le juge VLM</a></li>
         <li class="sub"><a href="#manager">vlm_manager.py</a></li>
         <li class="sub"><a href="#judge">judge.py</a></li>
         <li class="sub"><a href="#benchmark">benchmark.py</a></li>
+        <li class="sub"><a href="#analyze">analyze.py</a></li>
         <li><a href="#tuto">Tutoriel pas à pas</a></li>
         <li><a href="#suite">Ce qui reste à faire</a></li>
         <li><a href="#depannage">Dépannage</a></li>
@@ -372,11 +383,11 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <p>Le projet pose une question : <b>un VLM (modèle qui regarde une image et répond en texte) peut-il juger la qualité d'un CT synthétique, sans connaître la vraie réponse ?</b></p>
           <p>Pour y répondre, il faut trois choses, et le code est organisé exactement comme ça :</p>
           <ol>
-            <li><b>Des CT synthétiques (sCT) de qualité variée</b>, du très mauvais au très bon. C'est le rôle du dossier <code>sct_generation/</code> : il entraîne un réseau qui transforme une IRM en CT, et garde des versions du réseau à différents moments de son apprentissage.</li>
-            <li><b>Une mesure objective de leur qualité</b> (MAE, SSIM, gamma…), calculée en comparant chaque sCT au vrai CT. Ce script est à venir.</li>
-            <li><b>Le jugement des VLM</b> sur ces mêmes sCT, sans leur montrer le vrai CT ni les mesures. C'est le rôle du dossier <code>pipeline/</code>.</li>
+            <li><b>Des CT synthétiques (sCT) de qualité variée</b>, du très mauvais au très bon. C'est le rôle du dossier <code>sct_generation/</code> : il entraîne un réseau qui transforme une IRM en CT et garde des versions du réseau à différents moments de son apprentissage. Il y ajoute les sCT de trois modèles publiés et déjà entraînés (Li, Fu, Spadea), installés par Vincent sur la station.</li>
+            <li><b>Une mesure objective de leur qualité</b> (MAE, PSNR, SSIM), calculée en comparant chaque sCT au vrai CT, et les coupes rendues en PNG. C'est le rôle de <code>make_testbench.py</code>, qui produit le banc d'essai.</li>
+            <li><b>Le jugement des VLM</b> sur ces PNG, sans leur montrer le vrai CT ni les mesures. C'est le rôle du dossier <code>pipeline/</code>.</li>
           </ol>
-          <p>À la fin, on compare les notes des VLM aux mesures objectives. Si les deux classent les sCT dans le même ordre, le VLM est un bon juge.</p>
+          <p>À la fin, <code>analyze.py</code> compare les notes des VLM aux mesures objectives. Si les deux classent les sCT dans le même ordre, le VLM est un bon juge.</p>
         </div>
       </section>
 
@@ -387,11 +398,11 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <h2>La chaîne complète</h2>
         </div>
         <div class="prose">
-          <p>Chaque boîte est un script. Chaque flèche est un fichier qu'un script écrit et que le suivant lit. On lance les scripts dans l'ordre, de gauche à droite en haut, puis de droite à gauche en bas.</p>
+          <p>Chaque boîte est un script. Chaque flèche est un fichier qu'un script écrit et que le suivant lit. On lance les scripts dans l'ordre : la ligne du haut, puis la deuxième ligne, puis celle du bas, de droite à gauche.</p>
         </div>
         <figure>
           <div class="diagram">
-            <svg viewBox="0 0 960 390" role="img" aria-label="Chaîne complète : SynthRAD2023, make_split, preprocess, train et predict produisent des sCT ; le rendu PNG les envoie au benchmark VLM, dont les notes vont à l'analyse ; les métriques vont directement à l'analyse sans passer par le VLM.">
+            <svg viewBox="0 0 960 420" role="img" aria-label="Chaîne complète : SynthRAD2023, make_split, preprocess, train et predict produisent les sCT du U-Net ; pretrained.py produit ceux des modèles Li, Fu et Spadea. make_testbench calcule les métriques et rend les PNG ; benchmark fait noter les PNG par les VLM ; analyze compare les notes aux métriques, qui ne passent jamais par le VLM.">
               <defs>
                 <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-ink"/></marker>
                 <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="m-amber"/></marker>
@@ -428,33 +439,41 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
               <line x1="743" y1="82" x2="808" y2="82" class="d-line" marker-end="url(#ah)"/>
               <text x="776" y="74" text-anchor="middle" class="d-lab">.pt</text>
 
-              <line x1="875" y1="114" x2="875" y2="218" class="d-line" marker-end="url(#ah)"/>
-              <text x="883" y="170" class="d-lab">sct.nii.gz</text>
+              <rect x="415" y="150" width="180" height="64" rx="6" class="d-box"/>
+              <text x="505" y="178" text-anchor="middle" class="d-mono">pretrained.py</text>
+              <text x="505" y="198" text-anchor="middle" class="d-cap">Li · Fu · Spadea (Vincent)</text>
 
-              <text x="470" y="208" class="d-group">PARTIE B · pipeline/</text>
+              <rect x="790" y="150" width="150" height="64" rx="6" class="d-box"/>
+              <text x="865" y="178" text-anchor="middle" class="d-mono">make_testbench.py</text>
+              <text x="865" y="198" text-anchor="middle" class="d-cap">métriques + PNG</text>
 
-              <rect x="790" y="220" width="150" height="64" rx="6" class="d-box todo"/>
-              <text x="865" y="248" text-anchor="middle" class="d-title">Rendu PNG</text>
-              <text x="865" y="268" text-anchor="middle" class="d-cap">+ métriques · à venir</text>
+              <polyline points="85,114 85,182 413,182" class="d-line" marker-end="url(#ah)"/>
+              <text x="250" y="174" text-anchor="middle" class="d-lab">mr.nii.gz</text>
+              <line x1="595" y1="182" x2="788" y2="182" class="d-line" marker-end="url(#ah)"/>
+              <text x="691" y="174" text-anchor="middle" class="d-lab">synct.nii.gz</text>
+              <line x1="875" y1="114" x2="875" y2="148" class="d-line" marker-end="url(#ah)"/>
+              <text x="883" y="136" class="d-lab">sct.nii.gz</text>
 
-              <rect x="470" y="220" width="170" height="64" rx="6" class="d-box hl"/>
-              <text x="555" y="248" text-anchor="middle" class="d-mono">benchmark.py</text>
-              <text x="555" y="268" text-anchor="middle" class="d-cap">VLM via Ollama</text>
+              <text x="60" y="276" class="d-group">PARTIE B · pipeline/</text>
 
-              <rect x="60" y="220" width="150" height="64" rx="6" class="d-box todo"/>
-              <text x="135" y="248" text-anchor="middle" class="d-title">Analyse</text>
-              <text x="135" y="268" text-anchor="middle" class="d-cap">corrélations · à venir</text>
+              <rect x="470" y="290" width="170" height="64" rx="6" class="d-box hl"/>
+              <text x="555" y="318" text-anchor="middle" class="d-mono">benchmark.py</text>
+              <text x="555" y="338" text-anchor="middle" class="d-cap">VLM via Ollama</text>
 
-              <line x1="790" y1="252" x2="642" y2="252" class="d-line" marker-end="url(#ah)"/>
-              <text x="716" y="244" text-anchor="middle" class="d-lab">PNG + testbench.csv</text>
-              <line x1="470" y1="252" x2="212" y2="252" class="d-line" marker-end="url(#ah)"/>
-              <text x="341" y="244" text-anchor="middle" class="d-lab">judgements.csv</text>
+              <rect x="60" y="290" width="150" height="64" rx="6" class="d-box"/>
+              <text x="135" y="318" text-anchor="middle" class="d-mono">analyze.py</text>
+              <text x="135" y="338" text-anchor="middle" class="d-cap">leaderboard</text>
 
-              <polyline points="865,284 865,350 135,350 135,288" class="d-amber" marker-end="url(#ah-amber)"/>
-              <text x="500" y="340" text-anchor="middle" class="d-lab t-amber">MAE, SSIM, gamma : jamais montrés au VLM</text>
+              <polyline points="840,214 840,322 642,322" class="d-line" marker-end="url(#ah)"/>
+              <text x="741" y="314" text-anchor="middle" class="d-lab">PNG + testbench.csv</text>
+              <line x1="470" y1="322" x2="212" y2="322" class="d-line" marker-end="url(#ah)"/>
+              <text x="341" y="314" text-anchor="middle" class="d-lab">judgements.csv</text>
+
+              <polyline points="915,214 915,395 135,395 135,358" class="d-amber" marker-end="url(#ah-amber)"/>
+              <text x="525" y="385" text-anchor="middle" class="d-lab t-amber">métriques (MAE, PSNR, SSIM) : jamais montrées au VLM</text>
             </svg>
           </div>
-          <figcaption>La chaîne complète. Les boîtes en pointillés n'existent pas encore. Le chemin orange est la règle centrale du projet : les mesures objectives vont directement à l'analyse et ne passent jamais par le VLM.</figcaption>
+          <figcaption>La chaîne complète. <code>make_testbench.py</code> lit aussi le vrai CT et le masque de SynthRAD pour calculer les métriques. Le chemin orange est la règle centrale du projet : les mesures objectives vont directement à l'analyse et ne passent jamais par le VLM, qui ne reçoit que les PNG.</figcaption>
         </figure>
       </section>
 
@@ -549,25 +568,31 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
 ├── uv.lock                 <span class="t-note">leurs versions exactes, figées pour toute l'équipe</span>
 ├── .gitignore              <span class="t-note">ce que git ne doit jamais enregistrer</span>
 │
-├── <span class="t-dir">sct_generation/</span>         <span class="t-note">PARTIE A : fabriquer les sCT</span>
-│   ├── config.py           <span class="t-note">chemins et réglages d'entraînement</span>
+├── <span class="t-dir">sct_generation/</span>         <span class="t-note">PARTIE A : fabriquer les sCT et le banc d'essai</span>
+│   ├── config.py           <span class="t-note">chemins, réglages d'entraînement, modèles pré-entraînés, rendu</span>
 │   ├── make_split.py       <span class="t-note">1. découpe les patients en train / val / test</span>
 │   ├── preprocess.py       <span class="t-note">2. normalise les images et les met en cache</span>
 │   ├── data.py             <span class="t-note">   outils de lecture des données (utilisé par 3 et 4)</span>
 │   ├── model.py            <span class="t-note">   le réseau U-Net (utilisé par 3 et 4)</span>
 │   ├── train.py            <span class="t-note">3. entraîne le réseau, sauvegarde des checkpoints</span>
-│   ├── predict.py          <span class="t-note">4. génère les sCT avec chaque checkpoint</span>
+│   ├── predict.py          <span class="t-note">4. génère les sCT du U-Net avec chaque checkpoint</span>
+│   ├── pretrained.py       <span class="t-note">5. génère les sCT des modèles Li, Fu et Spadea</span>
+│   ├── metrics.py          <span class="t-note">   MAE, PSNR, SSIM (utilisé par 6)</span>
+│   ├── render.py           <span class="t-note">   fenêtrage et rendu PNG (utilisé par 6)</span>
+│   ├── make_testbench.py   <span class="t-note">6. métriques + PNG de tous les sCT → testbench.csv</span>
 │   ├── <span class="t-dir">splits/</span>             <span class="t-note">le découpage, versionné dans git</span>
-│   └── <span class="t-dir">work/</span>               <span class="t-note">cache, checkpoints, sCT : jamais dans git</span>
+│   └── <span class="t-dir">work/</span>               <span class="t-note">cache, checkpoints, sCT, PNG : jamais dans git</span>
 │
 ├── <span class="t-dir">pipeline/</span>               <span class="t-note">PARTIE B : faire juger les sCT par les VLM</span>
-│   ├── config.py           <span class="t-note">modèles, prompts, température, graine</span>
+│   ├── config.py           <span class="t-note">modèles, prompts, température, graine, réglages de l'analyse</span>
 │   ├── vlm_manager.py      <span class="t-note">télécharger, charger, décharger les VLM</span>
 │   ├── judge.py            <span class="t-note">faire noter une image par un VLM</span>
-│   └── benchmark.py        <span class="t-note">tous les VLM × toutes les images → CSV</span>
+│   ├── benchmark.py        <span class="t-note">7. tous les VLM × toutes les images → CSV</span>
+│   └── analyze.py          <span class="t-note">8. notes × métriques → leaderboard</span>
 │
 └── <span class="t-dir">results/</span>
-    └── judgements.csv      <span class="t-note">une ligne par note donnée par un VLM</span></code></pre>
+    ├── judgements.csv      <span class="t-note">une ligne par note donnée par un VLM</span>
+    └── <span class="t-dir">analysis/</span>           <span class="t-note">leaderboard, corrélations, figures (un dossier par banc d'essai)</span></code></pre>
         </div>
       </section>
 
@@ -585,6 +610,10 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <div class="term"><b>Époque</b><span>Un tour d'entraînement. Ici, une époque = 2000 coupes tirées au hasard.</span></div>
           <div class="term"><b>Checkpoint</b><span>Une sauvegarde du réseau à une époque donnée (fichier <code>.pt</code>). Un checkpoint précoce donne des sCT flous, un checkpoint tardif de bons sCT.</span></div>
           <div class="term"><b>MAE</b><span>Erreur absolue moyenne entre le sCT et le vrai CT, en HU. Plus elle est basse, meilleur est le sCT.</span></div>
+          <div class="term"><b>PSNR, SSIM</b><span>Deux autres mesures de ressemblance au vrai CT. PSNR en dB, SSIM de 0 à 1 (structure : contours, textures). Plus elles sont hautes, meilleur est le sCT.</span></div>
+          <div class="term"><b>Modèle pré-entraîné</b><span>Un réseau déjà entraîné par d'autres et publié. Ici Li, Fu et Spadea (FedSynthCT-Brain), qu'on utilise sans les réentraîner.</span></div>
+          <div class="term"><b>Corrélation de Spearman</b><span>Mesure si deux classements vont dans le même sens : +1 identiques, 0 sans lien, −1 inversés. Ici : classement par note du VLM contre classement par MAE.</span></div>
+          <div class="term"><b>AUROC</b><span>Probabilité qu'un sCT acceptable reçoive une meilleure note qu'un sCT non acceptable. 1 = juge parfait, 0,5 = juge au hasard.</span></div>
           <div class="term"><b>VLM</b><span>Modèle vision-langage : il reçoit une image et une consigne (le prompt), et répond en texte.</span></div>
           <div class="term"><b>Ollama</b><span>Le logiciel qui fait tourner les VLM sur la station, sans rien envoyer sur Internet.</span></div>
           <div class="term"><b>VRAM</b><span>La mémoire de la carte graphique (32 Go). Un modèle doit y être chargé pour répondre vite.</span></div>
@@ -597,10 +626,10 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
       <section id="partie-a">
         <div class="section-head">
           <span class="eyebrow">sct_generation/</span>
-          <h2>Partie A : fabriquer les sCT</h2>
+          <h2>Partie A : fabriquer les sCT et le banc d'essai</h2>
         </div>
         <div class="prose">
-          <p>Le réseau utilisé est un <b>U-Net 2D</b> : on lui donne une coupe d'IRM, il dessine la coupe de CT correspondante. Il apprend en comparant ses dessins aux vrais CT des patients d'entraînement. Les quatre scripts se lancent dans l'ordre.</p>
+          <p>Les sCT viennent de deux sources. D'abord un <b>U-Net 2D</b> qu'on entraîne nous-mêmes : on lui donne une coupe d'IRM, il dessine la coupe de CT correspondante, et il apprend en comparant ses dessins aux vrais CT des patients d'entraînement (scripts 1 à 4). Ensuite <b>trois modèles publiés</b>, déjà entraînés, que Vincent a installés sur la station (script 5). Le script 6 transforme le tout en banc d'essai. Les scripts se lancent dans l'ordre.</p>
         </div>
 
         <div class="subsection" id="split">
@@ -720,6 +749,75 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
             <p>Le volume est prédit coupe par coupe. Comme le U-Net divise la taille de l'image par deux à quatre reprises, chaque coupe est d'abord complétée jusqu'à un multiple de 16 pixels, puis ce bord est retiré.</p>
           </div>
         </div>
+
+        <div class="subsection" id="pretrained">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">pretrained.py</span><span class="role">fabrique les sCT des trois modèles pré-entraînés Li, Fu et Spadea</span></div>
+            <dl>
+              <dt>Lance</dt><dd>Le script de Vincent, <code>/home/student/SYNTHETIC_CT/code/synthesize.py</code>, avec son Python à lui (<code>/home/vincent/venvs/TS/bin/python</code>), un patient à la fois. Son guide : <code>/home/student/SYNTHETIC_CT/GUIDE.md</code>.</dd>
+              <dt>Écrit</dt><dd><code>work/pretrained/test/1BA001/1BA001_li.synct.nii.gz</code>, <code>…_fu…</code>, <code>…_spadea…</code> : trois sCT par patient, en HU, sur la grille de l'IRM. Plus <code>results_summary.csv</code> et <code>figures/1BA001_montage.png</code> (IRM / Li / Fu / Spadea / CT côte à côte).</dd>
+              <dt>À retenir</dt><dd>Ces modèles tournent dans l'environnement de Vincent, pas dans le nôtre : notre script ne fait que l'appeler. Les chemins sont dans la section « Modèles pré-entraînés » de <code>config.py</code>.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Les trois modèles viennent de <a href="https://github.com/ciroraggio/SlicerModalityConverter">SlicerModalityConverter</a> et ont été entraînés avec FedSynthCT-Brain (Raggio <i>et al.</i>, <i>Computers in Biology and Medicine</i>, 2025). Ce sont des réseaux 2D qui traitent l'IRM T1 dans les trois plans, puis combinent les trois résultats par un vote médian. Leur MAE publiée est d'environ 100 HU sur des patients jamais vus : ils apportent au banc d'essai des sCT de bonne qualité, d'un autre style que ceux de notre U-Net.</p>
+            <p>Avec 27 patients de test, cela ajoute 81 sCT aux 189 du U-Net, soit 270 sCT au total. Comme pour <code>predict.py</code>, les patients déjà faits sont sautés si on relance, et un patient qui échoue n'arrête pas les autres.</p>
+          </div>
+          <div class="callout warn">
+            <span class="label">Ils ont peut-être déjà vu certains patients</span>
+            <p>FedSynthCT-Brain a été entraîné en partie sur SynthRAD2023 : le <b>centre C</b> a servi à son entraînement (29 patients, on ne sait pas lesquels), le centre B seulement à son test, le centre A jamais. Sur nos patients <code>1BC…</code>, ces modèles ont donc peut-être appris sur le patient lui-même, et leurs sCT y sont sans doute meilleurs que sur un patient nouveau.</p>
+            <p>Pour juger les VLM, ce n'est pas gênant : chaque sCT a sa vraie métrique, quelle que soit la façon dont il a été produit. En revanche, il ne faut pas présenter leur MAE sur le centre C comme une performance sur des patients nouveaux. La colonne <code>maybe_seen_in_training</code> du banc d'essai et la MAE par centre de <code>generators.csv</code> permettent d'en tenir compte.</p>
+          </div>
+        </div>
+
+        <div class="subsection" id="testbench">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">make_testbench.py</span><span class="role">calcule les métriques et rend les coupes en PNG : c'est le banc d'essai</span></div>
+            <dl>
+              <dt>Lit</dt><dd>Tous les sCT déjà produits pour une partie du split (chaque checkpoint de chaque run, et Li, Fu, Spadea), le vrai CT et le masque du corps.</dd>
+              <dt>Écrit</dt><dd><code>work/testbench/&lt;split&gt;/&lt;style&gt;/renders/*.png</code> et <code>testbench.csv</code>, une ligne par PNG.</dd>
+              <dt>Utilise</dt><dd><code>metrics.py</code> pour MAE, PSNR et SSIM, <code>render.py</code> pour le PNG.</dd>
+              <dt>À retenir</dt><dd>Le PNG ne contient que la coupe : aucun texte, aucune légende, rien qui trahisse le modèle ou la qualité. Les métriques restent dans le CSV.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Pour chaque patient, le script :</p>
+            <ol>
+              <li>choisit trois coupes axiales, à 35 %, 50 % et 65 % de la hauteur du corps (<code>SLICE_POSITIONS</code>). Ce sont <b>les mêmes coupes pour tous les sCT du patient</b> : on peut ainsi comparer les modèles à anatomie égale ;</li>
+              <li>calcule MAE, PSNR et SSIM dans le masque du corps, sur le volume entier puis sur chaque coupe rendue, avec les définitions du challenge SynthRAD2023 ;</li>
+              <li>met à l'air (−1024 HU) tout ce qui est hors du corps, pour tous les sCT : sinon le VLM pourrait reconnaître le U-Net à son fond bruité et les modèles pré-entraînés à leur fond parfaitement noir, au lieu de juger l'anatomie ;</li>
+              <li>recadre la coupe sur le corps, applique le fenêtrage du style choisi et enregistre le PNG.</li>
+            </ol>
+            <p>Deux styles de rendu sont prêts dans <code>RENDER_STYLES</code>. Choisir le meilleur fait partie de la mise au point du juge, sur val :</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Style</th><th>Fenêtres de HU</th><th>Image</th></tr></thead>
+              <tbody>
+                <tr><td><code>gray</code> (par défaut)</td><td>une fenêtre large, −1000 à 1000 : air, tissus mous et os visibles ensemble</td><td class="num">gris · 512 × 512</td></tr>
+                <tr><td><code>rgb3</code></td><td>rouge −1024 à 1024, vert −135 à 215, bleu 0 à 80 : le codage recommandé par Google pour MedGemma</td><td class="num">couleur · 896 × 896</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="prose">
+            <p>Avec 27 patients, 10 générateurs (7 checkpoints + 3 modèles) et 3 coupes, le banc d'essai de test compte <b>810 images</b>. Les métriques du volume entier, la partie la plus longue, sont gardées dans <code>work/testbench/&lt;split&gt;/volume_metrics.csv</code> : changer de style ne les recalcule pas.</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Colonne de testbench.csv</th><th>Contenu</th></tr></thead>
+              <tbody>
+                <tr><td><code>item_id</code>, <code>image_path</code></td><td>les deux seules colonnes lues par <code>benchmark.py</code></td></tr>
+                <tr><td><code>split</code>, <code>patient_id</code>, <code>center</code></td><td>d'où vient la coupe</td></tr>
+                <tr><td><code>generator</code></td><td>le modèle qui a produit le sCT : <code>unet_baseline/epoch_005</code>, <code>fedsynth/li</code>…</td></tr>
+                <tr><td><code>slice_index</code>, <code>slice_position</code></td><td>la coupe : indice dans le volume, position relative dans le corps</td></tr>
+                <tr><td><code>render_style</code></td><td>le style de rendu</td></tr>
+                <tr><td><code>mae_hu</code>, <code>psnr_db</code>, <code>ssim</code></td><td>métriques sur le volume entier</td></tr>
+                <tr><td><code>mae_hu_slice</code>, <code>psnr_db_slice</code>, <code>ssim_slice</code></td><td>métriques sur la coupe rendue seule : exactement ce que le VLM voit</td></tr>
+                <tr><td><code>maybe_seen_in_training</code></td><td>1 si le générateur a peut-être été entraîné sur ce patient</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <!-- ============================================================ -->
@@ -788,7 +886,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           </div>
           <div class="prose">
             <p>Le prompt est en anglais, car les VLM y répondent généralement mieux. Il demande d'évaluer le réalisme anatomique de la coupe (anatomie plausible, contours nets, contraste os / tissus / air, absence d'artéfacts) et de donner une note de 0 (clairement irréaliste) à 100 (impossible à distinguer d'un vrai CT). Il ne contient aucune métrique ni aucun indice sur la vraie réponse.</p>
-            <p>Deux réglages rendent les réponses reproductibles : <code>TEMPERATURE = 0</code> (le modèle choisit toujours la réponse la plus probable) et <code>SEED = 42</code>.</p>
+            <p>Deux réglages rendent les réponses reproductibles : <code>TEMPERATURE = 0</code> (le modèle choisit toujours la réponse la plus probable) et <code>SEED = 42</code>. Un troisième, <code>NUM_PREDICT</code>, plafonne la longueur de la réponse : à température 0, un petit modèle peut se mettre à répéter la même phrase sans fin ; sa réponse est alors coupée et notée en erreur au lieu de bloquer l'image pendant des minutes.</p>
             <p>Pour tester une autre formulation, on ajoute une nouvelle entrée dans <code>PROMPTS</code> au lieu de modifier <code>realism_v1</code>. Le nom du prompt est enregistré avec chaque note, ce qui permet de comparer les formulations (biais de prompt).</p>
           </div>
         </div>
@@ -797,7 +895,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <div class="fiche">
             <div class="fiche-head"><span class="file">benchmark.py</span><span class="role">fait noter toutes les images par tous les modèles</span></div>
             <dl>
-              <dt>Lit</dt><dd>Un fichier <code>testbench.csv</code> avec deux colonnes : <code>item_id</code> (un identifiant unique) et <code>image_path</code> (le chemin du PNG).</dd>
+              <dt>Lit</dt><dd>Le <code>testbench.csv</code> produit par <code>make_testbench.py</code>, dont seulement deux colonnes : <code>item_id</code> (un identifiant unique) et <code>image_path</code> (le chemin du PNG).</dd>
               <dt>Écrit</dt><dd><code>Synthesis/results/judgements.csv</code>, une ligne par note, ajoutée au fur et à mesure.</dd>
               <dt>À retenir</dt><dd>Le benchmark ne lit <b>que</b> ces deux colonnes. Si <code>testbench.csv</code> contient aussi les métriques, elles sont ignorées : le VLM ne peut pas les voir.</dd>
             </dl>
@@ -811,13 +909,46 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
               <li>lui faire noter chaque image et écrire la ligne dans le CSV aussitôt ;</li>
               <li>le décharger, même après une erreur ou un Ctrl+C, puis passer au suivant.</li>
             </ol>
-            <p>Si une image pose problème (délai dépassé, réponse invalide), l'erreur est notée dans la colonne <code>error</code> et le benchmark continue. Si le script s'arrête, il suffit de le relancer avec la même commande : les notes déjà obtenues sont sautées.</p>
+            <p>Si une image pose problème (délai dépassé, réponse invalide ou coupée), l'erreur est notée dans la colonne <code>error</code> et le benchmark continue. Si c'est un modèle entier qui ne se télécharge pas ou ne se charge pas, il est signalé et le benchmark passe au suivant. Si le script s'arrête, il suffit de le relancer avec la même commande : les notes déjà obtenues sont sautées.</p>
           </div>
           <div class="code">
             <span class="where">Format de judgements.csv · exemple inventé</span>
 <pre><code>model,prompt_name,item_id,score,reason,latency_s,vram_gb,error,timestamp
-medgemma:latest,realism_v1,1BA005_epoch_001,18,"Blurred bone edges, no gyri",2.1,5.4,,2026-11-12T22:14:03
-medgemma:latest,realism_v1,1BA005_epoch_100,81,"Plausible anatomy, sharp skull",2.0,5.4,,2026-11-12T22:14:05</code></pre>
+medgemma:latest,realism_v1,1BA005_unet_baseline-epoch_001_z072_gray,18,"Blurred bone edges, no gyri",2.1,5.4,,2026-11-12T22:14:03
+medgemma:latest,realism_v1,1BA005_fedsynth-li_z072_gray,81,"Plausible anatomy, sharp skull",2.0,5.4,,2026-11-12T22:14:05</code></pre>
+          </div>
+        </div>
+
+        <div class="subsection" id="analyze">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">analyze.py</span><span class="role">compare les notes des VLM aux métriques : c'est le leaderboard</span></div>
+            <dl>
+              <dt>Lit</dt><dd><code>results/judgements.csv</code> (les notes) et un <code>testbench.csv</code> (les métriques), rattachés ligne à ligne par <code>item_id</code>. Seules les notes des images de ce banc d'essai sont prises.</dd>
+              <dt>Écrit</dt><dd><code>results/analysis/&lt;split&gt;_&lt;style&gt;/</code> : <code>leaderboard.csv</code>, <code>correlations.csv</code>, <code>filtering.csv</code>, <code>generators.csv</code>, <code>scores_and_metrics.csv</code> et <code>scatter.png</code>.</dd>
+              <dt>À retenir</dt><dd>Les corrélations sont <b>orientées</b> : +1 veut toujours dire « le VLM donne les meilleures notes aux meilleurs sCT », 0 « aucun lien ». Pour la MAE, où plus bas = meilleur, le signe est donc inversé.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>La métrique de référence est la MAE de la coupe rendue (<code>TARGET_METRIC = "mae_hu_slice"</code>), puisque c'est ce que le VLM voit. Pour chaque couple (modèle, prompt), le leaderboard répond à ces questions :</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Colonne</th><th>Question</th></tr></thead>
+              <tbody>
+                <tr><td><code>spearman_mae_hu_slice</code></td><td>Le classement des images par note suit-il celui par MAE ? C'est le critère principal, et le leaderboard est trié dessus.</td></tr>
+                <tr><td><code>…_ci_low</code>, <code>…_ci_high</code></td><td>Intervalle de confiance à 95 %, par bootstrap sur les patients. Si les intervalles de deux VLM se chevauchent largement, on ne peut pas dire lequel est meilleur.</td></tr>
+                <tr><td><code>pearson_mae_hu_slice</code></td><td>La relation entre note et MAE est-elle linéaire ?</td></tr>
+                <tr><td><code>spearman_intra</code></td><td>À anatomie égale (même patient, même coupe), le VLM classe-t-il bien les sCT des différents générateurs ? C'est la mesure la plus stricte : elle ne récompense pas un VLM qui réagit seulement au contenu de la coupe.</td></tr>
+                <tr><td><code>auroc</code></td><td>Le VLM sépare-t-il les coupes acceptables (MAE &lt; <code>ACCEPTABLE_THRESHOLD</code>, 100 HU par défaut) des autres ? 0,5 = hasard.</td></tr>
+                <tr><td><code>score_std</code></td><td>Les notes varient-elles ? Un écart-type proche de 0 signale un VLM qui donne toujours la même note.</td></tr>
+                <tr><td><code>coverage</code>, <code>n_errors</code></td><td>Quelle part des images a été notée sans erreur ?</td></tr>
+                <tr><td><code>latency_s_mean</code>, <code>vram_gb</code></td><td>Combien coûte ce juge ?</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="prose">
+            <p><code>filtering.csv</code> répond à la dernière question du projet : si on ne garde que la moitié des images les mieux notées (<code>KEEP_FRACTION</code>), la MAE moyenne baisse-t-elle ? La colonne <code>gain_vs_oracle</code> vaut 1 si le juge fait aussi bien qu'un filtrage par la vraie MAE, 0 s'il ne fait pas mieux que le hasard.</p>
+            <p><code>generators.csv</code> décrit le banc d'essai lui-même : MAE, PSNR et SSIM moyens de chaque générateur, et MAE par centre. On y vérifie que la qualité est bien variée, du checkpoint de l'époque 1 aux modèles pré-entraînés.</p>
           </div>
         </div>
       </section>
@@ -836,13 +967,16 @@ medgemma:latest,realism_v1,1BA005_epoch_100,81,"Plausible anatomy, sharp skull",
           <li>
             <div class="step-body">
               <h3>Envoyer le code sur GitHub <span class="where-tag">ton PC</span></h3>
-              <p>Tant que le dossier <code>Synthesis/</code> n'est pas poussé, la station ne peut pas le récupérer.</p>
+              <p>Tant que le dossier <code>Synthesis/</code> n'est pas poussé, la station ne peut pas le récupérer. Si <code>pyproject.toml</code> a changé (c'est le cas avec cette version, qui ajoute pandas, scikit-image, scipy, matplotlib et pillow), lance d'abord <code>uv lock</code> : il met à jour <code>uv.lock</code>, et c'est ce fichier que la station utilisera.</p>
               <div class="code nolabel">
-<pre><code>cd "C:/Users/agent/Documents/IMT/Commande-Entreprise/Code/Synthese/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration"
+<pre><code>cd "C:/Users/agent/Documents/IMT/Commande-Entreprise/Code/Synthese/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis"
+uv lock                <span class="c"># seulement si pyproject.toml a changé</span>
+cd ..
 git add Synthesis
-git commit -m "Volet synthèse : pipeline VLM juge, génération de sCT, environnement uv"
+git commit -m "Volet synthèse : modèles pré-entraînés, banc d'essai (métriques + PNG), analyse"
 git push</code></pre>
               </div>
+              <p class="expect"><code>uv lock</code> doit finir par <b>Resolved … packages</b>. Si on l'oublie, <code>uv</code> met <code>uv.lock</code> à jour sur la station, et le <code>git pull</code> suivant y sera refusé (voir le <a href="#depannage">dépannage</a>).</p>
             </div>
           </li>
 
@@ -877,7 +1011,7 @@ git pull</code></pre>
           <li>
             <div class="step-body">
               <h3>Installer l'environnement Python <span class="where-tag">station · une fois</span></h3>
-              <p><code>uv sync</code> lit <code>pyproject.toml</code> et <code>uv.lock</code>, puis installe exactement les mêmes versions pour tout le monde, dont le PyTorch compatible avec la RTX 5090. À relancer seulement si ces fichiers changent.</p>
+              <p><code>uv sync</code> lit <code>pyproject.toml</code> et <code>uv.lock</code>, puis installe exactement les mêmes versions pour tout le monde, dont le PyTorch compatible avec la RTX 5090. À relancer seulement si ces fichiers changent, par exemple après un <code>git pull</code> qui apporte de nouvelles bibliothèques.</p>
               <div class="code nolabel">
 <pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
 uv sync
@@ -976,18 +1110,42 @@ uv run python predict.py --run unet_baseline --split val   <span class="c"># pat
 
           <li>
             <div class="step-body">
-              <h3>Faire noter une image par un VLM <span class="where-tag">station</span></h3>
-              <p>Le script qui transforme les sCT en PNG n'existe pas encore. Pour tester la partie VLM dès maintenant, on peut utiliser n'importe quelle image PNG copiée depuis ton PC :</p>
-              <div class="code">
-                <span class="where">Sur ton PC</span>
-<pre><code>scp coupe.png student@100.106.248.35:~/</code></pre>
+              <h3>Générer les sCT des modèles pré-entraînés <span class="where-tag">station</span></h3>
+              <p>Le script appelle celui de Vincent, patient par patient. Il utilise le GPU : vérifie d'abord <code>nvidia-smi</code>, comme pour l'entraînement. On commence par val, qui sert à la mise au point.</p>
+              <div class="code nolabel">
+<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation
+uv run python pretrained.py --split val --patients 1BA005   <span class="c"># essai sur un patient de val (à prendre dans splits/task1_brain.csv)</span>
+uv run python pretrained.py --split val                     <span class="c"># tous les patients de val</span>
+uv run python pretrained.py                                 <span class="c"># patients de test</span></code></pre>
               </div>
-              <div class="code">
-                <span class="where">Sur la station</span>
+              <p class="expect">Une ligne par patient, puis les messages du script de Vincent. Les sCT apparaissent dans <b>work/pretrained/&lt;split&gt;/&lt;patient&gt;/</b>, avec un montage IRM / Li / Fu / Spadea / CT dans <b>figures/</b> à ouvrir pour vérifier que tout est cohérent. Les patients déjà faits sont sautés si on relance.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Construire le banc d'essai <span class="where-tag">station</span></h3>
+              <p>Le script prend tous les sCT disponibles (U-Net et modèles pré-entraînés), calcule leurs métriques et rend les coupes en PNG. Il n'utilise pas le GPU. On l'essaie d'abord sur deux patients :</p>
+              <div class="code nolabel">
+<pre><code>uv run python make_testbench.py --split val --max-patients 2   <span class="c"># essai rapide</span>
+uv run python make_testbench.py --split val                    <span class="c"># tout val, rendu « gray »</span>
+uv run python make_testbench.py --split val --style rgb3       <span class="c"># le même en couleur, pour comparer</span></code></pre>
+              </div>
+              <p class="expect">Une ligne par patient, puis la <b>MAE moyenne par générateur</b> : elle doit baisser de l'époque 1 à l'époque 100, et les modèles Li, Fu, Spadea doivent être parmi les meilleurs. Les PNG sont dans <b>work/testbench/val/gray/renders/</b> : ouvre-en quelques-uns (avec VS Code Remote, ou rapatriés par <code>scp</code>) pour vérifier qu'on voit bien une coupe de crâne, avant de lancer les VLM.</p>
+              <p>Le banc d'essai de test se construit de la même façon (<code>uv run python make_testbench.py</code>), mais seulement une fois le prompt et le rendu choisis sur val.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Faire noter une image par un VLM <span class="where-tag">station</span></h3>
+              <p>Avant le benchmark complet, on vérifie qu'un modèle répond bien sur une image du banc d'essai :</p>
+              <div class="code nolabel">
 <pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/pipeline
 uv run python vlm_manager.py list                     <span class="c"># modèles installés</span>
 uv run python vlm_manager.py ps                       <span class="c"># modèles chargés en ce moment</span>
-uv run python judge.py medgemma:latest ~/coupe.png</code></pre>
+ls ../sct_generation/work/testbench/val/gray/renders | head -3
+uv run python judge.py medgemma:latest ../sct_generation/work/testbench/val/gray/renders/&lt;un_des_fichiers&gt;.png</code></pre>
               </div>
               <p class="expect">Tu dois voir <b>Score</b>, <b>Raison</b> et <b>Temps</b>. Le premier appel est plus long car il inclut le chargement du modèle. Le script décharge ensuite le modèle s'il n'était pas déjà en mémoire avant le test.</p>
             </div>
@@ -995,22 +1153,36 @@ uv run python judge.py medgemma:latest ~/coupe.png</code></pre>
 
           <li>
             <div class="step-body">
-              <h3>Lancer le benchmark <span class="where-tag">station · plus tard</span></h3>
-              <p>Cette étape demande le fichier <code>testbench.csv</code>, qui sera produit par le futur script de rendu. On commence par un seul modèle rapide, puis on lance tout, de préférence aux heures creuses et dans <code>tmux</code>.</p>
+              <h3>Lancer le benchmark <span class="where-tag">station</span></h3>
+              <p>D'abord sur val, avec un seul modèle rapide, puis avec tous, de préférence aux heures creuses et dans <code>tmux</code>. Avec 810 images et dix modèles, compte une nuit environ.</p>
               <div class="code nolabel">
-<pre><code>uv run python benchmark.py --testbench chemin/testbench.csv --models medgemma:latest
-uv run python benchmark.py --testbench chemin/testbench.csv            <span class="c"># modèles installés</span>
-uv run python benchmark.py --testbench chemin/testbench.csv --pull     <span class="c"># + télécharge les manquants</span></code></pre>
+<pre><code>TB=../sct_generation/work/testbench/val/gray/testbench.csv
+uv run python benchmark.py --testbench $TB --models medgemma:latest
+uv run python benchmark.py --testbench $TB            <span class="c"># modèles installés</span>
+uv run python benchmark.py --testbench $TB --pull     <span class="c"># + télécharge les manquants</span></code></pre>
               </div>
-              <p>Avant un <code>--pull</code> complet (environ 45 Go pour les six modèles manquants), vérifie la place disque avec <code>df -h /</code>.</p>
+              <p>Avant un <code>--pull</code> complet (environ 45 Go pour les six modèles manquants), vérifie la place disque avec <code>df -h /</code>. Pour comparer un autre prompt, ajoute-le dans <code>PROMPTS</code> et relance avec <code>--prompt &lt;nom&gt;</code> ; pour l'autre style de rendu, passe le <code>testbench.csv</code> de <code>val/rgb3/</code>. Les notes s'ajoutent au même <code>judgements.csv</code> sans se mélanger.</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
+              <h3>Analyser les notes <span class="where-tag">station</span></h3>
+              <p>Dès que quelques modèles ont tourné, on peut regarder où ils en sont. L'analyse se relance autant de fois qu'on veut.</p>
+              <div class="code nolabel">
+<pre><code>uv run python analyze.py --testbench ../sct_generation/work/testbench/val/gray/testbench.csv</code></pre>
+              </div>
+              <p class="expect">Le nombre de notes rattachées, la répartition acceptables / non acceptables, puis le <b>leaderboard</b> trié du meilleur juge au moins bon. Tout est écrit dans <b>Synthesis/results/analysis/val_gray/</b>. Le choix du prompt et du rendu se fait sur ces résultats de val ; ensuite seulement, on construit le banc d'essai de test, on lance le benchmark dessus et on l'analyse de la même façon.</p>
             </div>
           </li>
 
           <li>
             <div class="step-body">
               <h3>Récupérer les résultats <span class="where-tag">ton PC</span></h3>
+              <p>Les notes et les résultats de l'analyse ne contiennent aucune image patient : on peut les commiter.</p>
               <div class="code nolabel">
-<pre><code>scp student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/judgements.csv Synthesis/results/</code></pre>
+<pre><code>scp student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/judgements.csv Synthesis/results/
+scp -r student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/analysis Synthesis/results/</code></pre>
               </div>
             </div>
           </li>
@@ -1025,11 +1197,11 @@ uv run python benchmark.py --testbench chemin/testbench.csv --pull     <span cla
         </div>
         <div class="prose">
           <ol>
-            <li><b>Métriques et rendu PNG.</b> Pour chaque sCT : calculer MAE, PSNR et SSIM contre le vrai CT, choisir des coupes, les enregistrer en PNG et écrire <code>testbench.csv</code>. Pour MedGemma, Google recommande de coder le CT en couleur avec trois fenêtres de HU : rouge de −1024 à 1024, vert de −135 à 215, bleu de 0 à 80, et des images de 896 × 896 pixels.</li>
-            <li><b>Mise au point du juge sur val.</b> Comparer plusieurs prompts et styles de rendu sur les sCT de val, et garder le meilleur. Ne jamais faire ces réglages en regardant les résultats du test.</li>
-            <li><b>Benchmark final sur test</b> avec tous les modèles.</li>
-            <li><b>Analyse.</b> Corrélations de Spearman et de Pearson entre notes des VLM et métriques, AUROC pour séparer les sCT acceptables des autres, temps et VRAM par modèle : c'est le leaderboard.</li>
-            <li><b>Filtrage.</b> Garder les sCT jugés bons par le meilleur VLM et mesurer le gain, comparé à un filtrage par la vraie métrique et à un filtrage au hasard.</li>
+            <li><b>Valider la nouvelle chaîne sur la station.</b> <code>pretrained.py</code>, <code>make_testbench.py</code> et <code>analyze.py</code> ont été testés sur des données factices, pas encore sur SynthRAD. Premier passage sur deux patients de val (étapes 11 à 15), en ouvrant les PNG et les montages pour vérifier à l'œil.</li>
+            <li><b>Mise au point du juge sur val.</b> Comparer plusieurs prompts (<code>PROMPTS</code>) et les deux styles de rendu (<code>gray</code>, <code>rgb3</code>) sur les sCT de val, avec <code>analyze.py</code>, et garder la meilleure combinaison. Ne jamais faire ces réglages en regardant les résultats du test.</li>
+            <li><b>Benchmark final sur test</b> avec tous les modèles, une seule fois, puis <code>analyze.py</code> sur le banc d'essai de test : c'est le leaderboard à rapporter.</li>
+            <li><b>Métriques de dose.</b> Gamma 2 %/2 mm et écarts de DVH demandent un moteur de calcul de dose (par exemple matRad ou OpenTPS) et des plans de traitement : elles ne sont pas encore calculées. Une fois disponibles, il suffit de les ajouter comme colonnes de <code>testbench.csv</code> et à la liste <code>METRICS</code> de <code>analyze.py</code>.</li>
+            <li><b>Rapport.</b> Discuter les intervalles de confiance (27 patients, c'est peu), la corrélation à anatomie égale (<code>spearman_intra</code>), le biais possible des modèles pré-entraînés sur le centre C, et le gain du filtrage (<code>filtering.csv</code>).</li>
           </ol>
         </div>
       </section>
@@ -1051,6 +1223,13 @@ uv run python benchmark.py --testbench chemin/testbench.csv --pull     <span cla
               <tr><td>« … existe déjà »</td><td>Split ou run déjà créé ; le script refuse d'écraser.</td><td>Pour un run : choisir un autre nom avec <code>--run</code>. Pour le split : ne le supprimer qu'en accord avec l'équipe.</td></tr>
               <tr><td>« … n'est pas installé, on passe »</td><td>Modèle absent du cache Ollama.</td><td>Relancer avec <code>--pull</code>, ou <code>vlm_manager.py pull &lt;modèle&gt;</code>.</td></tr>
               <tr><td>« Attention : … Go sont en RAM (CPU) »</td><td>Le modèle ne tient pas entièrement en VRAM, souvent parce qu'un autre programme occupe le GPU.</td><td>Vérifier <code>nvidia-smi</code> et <code>ollama ps</code> ; relancer plus tard. Les temps mesurés pendant ce run ne sont pas fiables.</td></tr>
+              <tr><td>« … introuvable (voir PRETRAINED_PYTHON / PRETRAINED_SCRIPT) »</td><td>Script lancé hors de la station, ou installation de Vincent déplacée.</td><td>Lancer sur la station. Vérifier les chemins avec <code>ls</code> (voir son guide <code>/home/student/SYNTHETIC_CT/GUIDE.md</code>) et corriger <code>sct_generation/config.py</code>.</td></tr>
+              <tr><td>« patient(s) en échec » dans <code>pretrained.py</code></td><td>Le script de Vincent s'est arrêté pour ce patient (son message s'affiche juste au-dessus).</td><td>Relancer la même commande : seuls les patients manquants sont refaits. Si l'erreur persiste, la transmettre à Vincent avec le message.</td></tr>
+              <tr><td>« Aucun sCT trouvé pour la partie … »</td><td><code>make_testbench.py</code> lancé avant <code>predict.py</code> ou <code>pretrained.py</code> sur cette partie.</td><td>Générer d'abord les sCT avec le même <code>--split</code> (étapes 10 et 11).</td></tr>
+              <tr><td>« … n'est pas sur la grille du CT : rééchantillonnage »</td><td>Un sCT a été écrit avec une autre taille ou un autre espacement de voxels que le CT.</td><td>Rien à faire : il est ramené sur la grille du CT avant le calcul. Si c'est le cas de tous les sCT d'un modèle, le signaler à son auteur.</td></tr>
+              <tr><td>« une seule classe, l'AUROC n'est pas calculable »</td><td>Toutes les coupes sont du même côté du seuil d'acceptabilité.</td><td>Ajuster <code>ACCEPTABLE_THRESHOLD</code> dans <code>pipeline/config.py</code> d'après la répartition des MAE (<code>generators.csv</code>).</td></tr>
+              <tr><td>« réponse coupée après … tokens »</td><td>Le modèle s'est mis à répéter du texte sans fin.</td><td>Normal de temps en temps pour les petits modèles : l'image est comptée en erreur. Si c'est fréquent, essayer un autre prompt.</td></tr>
+              <tr><td><code>git pull</code> refuse : « Your local changes … uv.lock »</td><td><code>uv</code> a mis à jour <code>uv.lock</code> sur la station parce que <code>pyproject.toml</code> avait changé sans lui.</td><td>Sur la station : <code>git checkout uv.lock</code> puis <code>git pull</code> et <code>uv sync</code>. À l'avenir, lancer <code>uv lock</code> sur le PC avant de commiter (étape 1).</td></tr>
               <tr><td>L'entraînement s'arrête quand je ferme le terminal</td><td>Le programme était attaché à la connexion SSH.</td><td>Le lancer dans <code>tmux</code> ou avec <code>nohup</code> (étape 8).</td></tr>
               <tr><td>« CUDA out of memory » pendant l'entraînement</td><td>Le GPU est déjà occupé, par exemple par un VLM chargé.</td><td>Vérifier <code>nvidia-smi</code>, attendre qu'il se libère, ou réduire <code>BATCH_SIZE</code> dans <code>sct_generation/config.py</code>.</td></tr>
             </tbody>

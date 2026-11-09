@@ -8,6 +8,7 @@ ce script ne fait qu'appeler le sien, patient par patient, pour une partie du sp
     uv run python pretrained.py                              # patients de test
     uv run python pretrained.py --split val                  # patients de val
     uv run python pretrained.py --patients 1BA001 1BA005     # quelques patients de test
+    uv run python pretrained.py --split val --max-patients 2 # les 2 premiers patients de val (essai)
 
 Pour chaque patient, le script de Vincent écrit dans work/pretrained/<split>/<patient>/ :
 
@@ -53,6 +54,7 @@ def main():
     parser = argparse.ArgumentParser(description="sCT des modèles pré-entraînés Li, Fu et Spadea.")
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
     parser.add_argument("--patients", nargs="+", help="par défaut : tous les patients de la partie")
+    parser.add_argument("--max-patients", type=int, help="limiter le nombre de patients (pour un essai)")
     parser.add_argument("--device", default=config.PRETRAINED_DEVICE, help="ex. cuda:0 ou cpu")
     args = parser.parse_args()
 
@@ -68,6 +70,9 @@ def main():
     outside = [p for p in patients if p not in split_patients]
     if outside:
         raise SystemExit(f"Pas dans la partie '{args.split}' : {', '.join(outside)} (voir --split).")
+    if args.max_patients:
+        # Les mêmes premiers patients que make_testbench.py --max-patients.
+        patients = patients[:args.max_patients]
 
     failures = []
     for i, patient_id in enumerate(patients, start=1):

@@ -46,4 +46,12 @@ station et le prochain `git pull` y sera bloqué.
 5. Faire noter les PNG par les VLM (`benchmark.py`), d'abord sur val pour régler prompt et rendu, puis une seule fois sur test.
 6. Corréler les notes avec les métriques et produire le leaderboard (`analyze.py`).
 
+Une fois le U-Net entraîné, `run_all.sh` enchaîne les étapes 3 à 6 en une commande, sur la station, dans `tmux` :
+
+```bash
+MAX_PATIENTS=2 bash run_all.sh val gray   # essai complet rapide sur deux patients de val
+bash run_all.sh val                       # mise au point du juge sur val (styles gray et rgb3)
+bash run_all.sh test gray                 # résultats finaux, avec le style choisi sur val
+```
+
 Les métriques de dose (gamma, DVH) demandent un moteur de calcul de dose : elles ne sont pas encore calculées.

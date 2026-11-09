@@ -1214,6 +1214,11 @@ MAX_PATIENTS=2 bash run_all.sh val gray 2&gt;&amp;1 | tee essai_rapide.log</code
 <pre><code>bash run_all.sh val 2&gt;&amp;1 | tee val.log           <span class="c"># styles gray et rgb3</span>
 MODELS="medgemma:latest gemma4:latest" bash run_all.sh val   <span class="c"># variante : seulement certains VLM</span></code></pre>
               </div>
+              <p>Trois prompts sont prêts dans <code>pipeline/config.py</code> : <code>realism_v1</code> (jugement global du réalisme, celui par défaut), <code>brain_rubric_v1</code> (barème par tranches de 20 points et points à regarder sur un crâne) et <code>defects_v1</code> (partir de 100 et retirer des points par défaut trouvé). Pour les comparer, sur un seul style pour limiter la durée, qui est multipliée par le nombre de prompts :</p>
+              <div class="code nolabel">
+<pre><code>PROMPTS="realism_v1 brain_rubric_v1 defects_v1" bash run_all.sh val gray 2&gt;&amp;1 | tee prompts.log</code></pre>
+              </div>
+              <p class="expect">Le leaderboard de <b>results/analysis/val_gray/</b> a alors une ligne par couple (modèle, prompt). On garde le meilleur prompt et on le met dans <code>DEFAULT_PROMPT</code> avant le test.</p>
               <p class="expect">Deux dossiers de résultats : <b>results/analysis/val_gray/</b> et <b>results/analysis/val_rgb3/</b>. On compare leurs <code>leaderboard.csv</code> pour choisir le style de rendu (et, si on en a essayé plusieurs, le prompt). C'est la mise au point du juge : elle se fait uniquement sur val.</p>
             </div>
           </li>
@@ -1226,7 +1231,7 @@ MODELS="medgemma:latest gemma4:latest" bash run_all.sh val   <span class="c"># v
 <pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
 bash run_all.sh test gray 2&gt;&amp;1 | tee test.log     <span class="c"># remplacer gray par le style choisi sur val</span></code></pre>
               </div>
-              <p class="expect">Banc d'essai de <b>810 images</b> (27 patients × 10 générateurs × 3 coupes), puis le leaderboard à rapporter dans <b>results/analysis/test_gray/</b>. Pour un autre prompt que <code>DEFAULT_PROMPT</code>, le changer dans <code>pipeline/config.py</code> avant de lancer.</p>
+              <p class="expect">Banc d'essai de <b>810 images</b> (27 patients × 10 générateurs × 3 coupes), puis le leaderboard à rapporter dans <b>results/analysis/test_gray/</b>. Le prompt utilisé est <code>DEFAULT_PROMPT</code> de <code>pipeline/config.py</code> : y mettre celui choisi sur val avant de lancer (ou passer <code>PROMPTS="&lt;nom&gt;"</code> devant la commande).</p>
             </div>
           </li>
 

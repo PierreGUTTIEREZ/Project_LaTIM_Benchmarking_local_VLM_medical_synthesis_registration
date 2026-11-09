@@ -10,6 +10,11 @@
 #   RUN=unet_baseline          run du U-Net dont on prend les checkpoints (défaut : unet_baseline)
 #   MAX_PATIENTS=2             limiter le nombre de patients (essai rapide)
 #   MODELS="medgemma:latest"   limiter les VLM (défaut : ceux de pipeline/config.py déjà installés)
+#   PROMPTS="realism_v1 brain_rubric_v1 defects_v1"
+#                              prompts à tester (défaut : DEFAULT_PROMPT de pipeline/config.py)
+#
+# Comparer les trois prompts sur val (chaque prompt multiplie la durée du benchmark) :
+#   PROMPTS="realism_v1 brain_rubric_v1 defects_v1" bash run_all.sh val gray
 #
 # Essai complet rapide, à faire avant les longs calculs :
 #   MAX_PATIENTS=2 bash run_all.sh val gray
@@ -44,11 +49,12 @@ if [[ -n "${MODELS:-}" ]]; then
     read -r -a VLMS <<< "$MODELS"
     VLMS=(--models "${VLMS[@]}")
 fi
+read -r -a PROMPT_NAMES <<< "${PROMPTS:-}"
 
 SYNTHESIS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 step() { echo; echo "=== $(date '+%H:%M:%S')  $*"; }
 
-echo "Partie : $SPLIT · styles : ${STYLES[*]} · run U-Net : $RUN · patients : ${MAX_PATIENTS:-tous} · VLM : ${MODELS:-installés}"
+echo "Partie : $SPLIT · styles : ${STYLES[*]} · run U-Net : $RUN · patients : ${MAX_PATIENTS:-tous} · VLM : ${MODELS:-installés} · prompts : ${PROMPTS:-par défaut}"
 echo "GPU partagé : vérifier que personne d'autre ne s'en sert (nvidia-smi, ollama ps)."
 
 cd "$SYNTHESIS_DIR/sct_generation"
@@ -70,8 +76,14 @@ cd "$SYNTHESIS_DIR/pipeline"
 for style in "${STYLES[@]}"; do
     testbench="../sct_generation/work/testbench/$SPLIT/$style/testbench.csv"
 
-    step "4/4  Benchmark des VLM, style $style (benchmark.py)"
-    uv run python benchmark.py --testbench "$testbench" "${VLMS[@]}"
+    if [[ ${#PROMPT_NAMES[@]} -eq 0 ]]; then
+        step "4/4  Benchmark des VLM, style $style (benchmark.py)"
+        uv run python benchmark.py --testbench "$testbench" "${VLMS[@]}"
+    fi
+    for prompt in "${PROMPT_NAMES[@]}"; do
+        step "4/4  Benchmark des VLM, style $style, prompt $prompt (benchmark.py)"
+        uv run python benchmark.py --testbench "$testbench" --prompt "$prompt" "${VLMS[@]}"
+    done
 
     step "     Analyse, style $style (analyze.py)"
     uv run python analyze.py --testbench "$testbench"

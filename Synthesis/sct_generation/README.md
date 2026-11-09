@@ -20,6 +20,7 @@ Les sCT viennent de deux sources :
 | `metrics.py` | MAE, PSNR et SSIM dans le masque du corps (définitions de SynthRAD2023) |
 | `render.py` | fenêtrage, recadrage et rendu d'une coupe en PNG |
 | `make_testbench.py` | métriques + PNG de tous les sCT disponibles, écrit `testbench.csv` |
+| `dose.py` | métriques de dose (gamma, DVH) : plan optimisé sur le vrai CT, recalculé sur chaque sCT |
 
 ## Étapes
 
@@ -87,6 +88,26 @@ uv run python make_testbench.py                             # test, une fois les
 Le script rassemble tous les sCT disponibles (chaque checkpoint de chaque run, et Li, Fu, Spadea), prend pour chaque patient les mêmes coupes axiales dans tous les sCT (`SLICE_POSITIONS`), met le fond hors du corps à l'air, recadre sur le corps et enregistre des PNG sans aucun texte. Il calcule aussi MAE, PSNR et SSIM sur le volume entier et sur la coupe rendue.
 
 Résultat dans `work/testbench/<split>/<style>/` : `renders/*.png` et `testbench.csv`, que l'on passe ensuite à `pipeline/benchmark.py`. Avec 27 patients, 10 générateurs et 3 coupes, cela fait 810 images.
+
+**8. (Facultatif) Calculer les métriques de dose**
+
+```bash
+uv run python dose.py --split val --max-patients 2   # essai
+uv run python dose.py --split val                    # puis --split test à la fin
+```
+
+Même principe que SynthRAD2023 : pour chaque patient, un plan est optimisé sur le **vrai CT**, puis recalculé tel quel (mêmes faisceaux, mêmes poids) sur chaque sCT, et les deux doses sont comparées. Le calcul de dose est fait par [pyRadPlan](https://github.com/e0404/pyRadPlan) (portage Python de matRad), en photons (IMRT 5 faisceaux, 6 MV) et en protons (2 faisceaux latéraux), sur le processeur : il peut tourner pendant le benchmark des VLM. Compter quelques minutes par patient.
+
+| Métrique (par modalité) | Contenu | Meilleur si |
+|---|---|---|
+| `gamma_photons`, `gamma_protons` | taux de réussite gamma 2 %/2 mm (seuil 10 %), en % | plus haut |
+| `dose_diff_…` | écart de dose moyen là où la dose dépasse 10 % du maximum, en % de la prescription | plus bas |
+| `ptv_d98_…`, `ptv_d2_…` | écart de D98 (couverture) et de D2 (point chaud) de la cible, en % de la prescription | plus bas |
+| `body_dmean_…` | écart de dose moyenne dans le corps, en % de la prescription | plus bas |
+
+Résultat : `work/testbench/<split>/dose_metrics.csv`, que `pipeline/analyze.py` lit tout seul. **Pas besoin de refaire le benchmark** : les notes des VLM ne changent pas, il suffit de relancer `analyze.py`. Les doses de référence (plan sur le vrai CT) sont dans `work/dose/<split>/<patient>/` pour vérification dans 3D Slicer.
+
+> **Limite à dire dans le rapport :** SynthRAD2023 ne fournit ni contours ni plans cliniques. La cible est donc une sphère de 15 mm de rayon, centrée sur les tissus mous de la tête, avec une prescription de 60 Gy (`DOSE_*` dans `config.py`). Les métriques mesurent l'effet des erreurs du sCT sur un plan réaliste, pas sur le plan réel du patient.
 
 ## Données patient
 

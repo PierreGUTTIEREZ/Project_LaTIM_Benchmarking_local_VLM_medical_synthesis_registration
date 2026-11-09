@@ -12,6 +12,7 @@
 #   MODELS="medgemma:latest"   limiter les VLM (défaut : ceux de pipeline/config.py déjà installés)
 #   PROMPTS="realism_v1 brain_rubric_v1 defects_v1"
 #                              prompts à tester (défaut : DEFAULT_PROMPT de pipeline/config.py)
+#   DOSE=1                     calculer aussi les métriques de dose (dose.py, long, sur le processeur)
 #
 # Comparer les trois prompts sur val (chaque prompt multiplie la durée du benchmark) :
 #   PROMPTS="realism_v1 brain_rubric_v1 defects_v1" bash run_all.sh val gray
@@ -54,7 +55,7 @@ read -r -a PROMPT_NAMES <<< "${PROMPTS:-}"
 SYNTHESIS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 step() { echo; echo "=== $(date '+%H:%M:%S')  $*"; }
 
-echo "Partie : $SPLIT · styles : ${STYLES[*]} · run U-Net : $RUN · patients : ${MAX_PATIENTS:-tous} · VLM : ${MODELS:-installés} · prompts : ${PROMPTS:-par défaut}"
+echo "Partie : $SPLIT · styles : ${STYLES[*]} · run U-Net : $RUN · patients : ${MAX_PATIENTS:-tous} · VLM : ${MODELS:-installés} · prompts : ${PROMPTS:-par défaut} · dose : ${DOSE:-0}"
 echo "GPU partagé : vérifier que personne d'autre ne s'en sert (nvidia-smi, ollama ps)."
 
 cd "$SYNTHESIS_DIR/sct_generation"
@@ -71,6 +72,13 @@ step "3/4  Banc d'essai : métriques et PNG (make_testbench.py)"
 for style in "${STYLES[@]}"; do
     uv run python make_testbench.py --split "$SPLIT" --style "$style" "${LIMIT[@]}"
 done
+
+if [[ "${DOSE:-0}" == "1" ]]; then
+    step "3b   Métriques de dose : gamma, DVH (dose.py)"
+    # Un échec ici n'arrête pas la chaîne : l'analyse se fera sans les patients manquants.
+    uv run python dose.py --split "$SPLIT" "${LIMIT[@]}" \
+        || echo "Attention : dose.py a signalé des échecs (voir plus haut). On continue."
+fi
 
 cd "$SYNTHESIS_DIR/pipeline"
 for style in "${STYLES[@]}"; do

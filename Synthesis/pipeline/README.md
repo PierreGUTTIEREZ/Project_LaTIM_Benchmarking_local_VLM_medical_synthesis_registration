@@ -90,8 +90,10 @@ Les corrélations sont **orientées** : +1 veut toujours dire « le VLM donne le
 | `score_std` | dispersion des notes : proche de 0, le VLM donne toujours la même note |
 | `latency_s_mean`, `vram_gb` | coût du juge |
 
+Si `sct_generation/dose.py` a tourné sur la même partie du split, ses métriques de dose (gamma, écarts de DVH, en photons et en protons) sont ajoutées automatiquement à `correlations.csv` et `generators.csv`. Il suffit de relancer `analyze.py`, sans refaire le benchmark.
+
 La métrique de référence, le seuil d'acceptabilité, le nombre de tirages du bootstrap et la part gardée au filtrage se règlent dans la section « Analyse » de `config.py`.
 
 ## Règle importante
 
-Le VLM ne voit que le PNG et le prompt. Les métriques (MAE, SSIM, gamma, DVH) ne sont jamais lues par `benchmark.py`. On les rattache aux scores au moment de l'analyse, grâce à `item_id`.
+Le VLM ne voit que le PNG et le prompt. Les métriques (MAE, PSNR, SSIM, gamma, DVH) ne sont jamais lues par `benchmark.py`. On les rattache aux scores au moment de l'analyse, grâce à `item_id`.

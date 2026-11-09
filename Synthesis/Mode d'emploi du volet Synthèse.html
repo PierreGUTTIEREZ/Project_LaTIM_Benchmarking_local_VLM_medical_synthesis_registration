@@ -334,12 +334,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <span class="chip new">métriques + rendu PNG</span>
           <span class="chip new">analyse des corrélations</span>
           <span class="chip new">tout lancer (run_all.sh)</span>
-        </div>
-      </div>
-      <div class="status-group">
-        <span class="eyebrow">À venir</span>
-        <div class="chips">
-          <span class="chip todo">métriques de dose (gamma, DVH)</span>
+          <span class="chip new">métriques de dose (gamma, DVH)</span>
         </div>
       </div>
     </div>
@@ -361,6 +356,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
         <li class="sub"><a href="#predict">predict.py</a></li>
         <li class="sub"><a href="#pretrained">pretrained.py</a></li>
         <li class="sub"><a href="#testbench">make_testbench.py</a></li>
+        <li class="sub"><a href="#dose">dose.py</a></li>
         <li><a href="#partie-b">Partie B : le juge VLM</a></li>
         <li class="sub"><a href="#manager">vlm_manager.py</a></li>
         <li class="sub"><a href="#judge">judge.py</a></li>
@@ -385,7 +381,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <p>Pour y répondre, il faut trois choses, et le code est organisé exactement comme ça :</p>
           <ol>
             <li><b>Des CT synthétiques (sCT) de qualité variée</b>, du très mauvais au très bon. C'est le rôle du dossier <code>sct_generation/</code> : il entraîne un réseau qui transforme une IRM en CT et garde des versions du réseau à différents moments de son apprentissage. Il y ajoute les sCT de trois modèles publiés et déjà entraînés (Li, Fu, Spadea), installés par Vincent sur la station.</li>
-            <li><b>Une mesure objective de leur qualité</b> (MAE, PSNR, SSIM), calculée en comparant chaque sCT au vrai CT, et les coupes rendues en PNG. C'est le rôle de <code>make_testbench.py</code>, qui produit le banc d'essai.</li>
+            <li><b>Une mesure objective de leur qualité</b> (MAE, PSNR, SSIM), calculée en comparant chaque sCT au vrai CT, et les coupes rendues en PNG. C'est le rôle de <code>make_testbench.py</code>, qui produit le banc d'essai. En option, <code>dose.py</code> y ajoute des métriques de dose (gamma, DVH).</li>
             <li><b>Le jugement des VLM</b> sur ces PNG, sans leur montrer le vrai CT ni les mesures. C'est le rôle du dossier <code>pipeline/</code>.</li>
           </ol>
           <p>À la fin, <code>analyze.py</code> compare les notes des VLM aux mesures objectives. Si les deux classent les sCT dans le même ordre, le VLM est un bon juge.</p>
@@ -471,10 +467,10 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
               <text x="341" y="314" text-anchor="middle" class="d-lab">judgements.csv</text>
 
               <polyline points="915,214 915,395 135,395 135,358" class="d-amber" marker-end="url(#ah-amber)"/>
-              <text x="525" y="385" text-anchor="middle" class="d-lab t-amber">métriques (MAE, PSNR, SSIM) : jamais montrées au VLM</text>
+              <text x="525" y="385" text-anchor="middle" class="d-lab t-amber">métriques (MAE, PSNR, SSIM, dose) : jamais montrées au VLM</text>
             </svg>
           </div>
-          <figcaption>La chaîne complète. <code>make_testbench.py</code> lit aussi le vrai CT et le masque de SynthRAD pour calculer les métriques. Le chemin orange est la règle centrale du projet : les mesures objectives vont directement à l'analyse et ne passent jamais par le VLM, qui ne reçoit que les PNG.</figcaption>
+          <figcaption>La chaîne complète. <code>make_testbench.py</code> lit aussi le vrai CT et le masque de SynthRAD pour calculer les métriques ; <code>dose.py</code>, facultatif, ajoute les métriques de dose par le même chemin. Le chemin orange est la règle centrale du projet : les mesures objectives vont directement à l'analyse et ne passent jamais par le VLM, qui ne reçoit que les PNG.</figcaption>
         </figure>
       </section>
 
@@ -582,6 +578,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
 │   ├── metrics.py          <span class="t-note">   MAE, PSNR, SSIM (utilisé par 6)</span>
 │   ├── render.py           <span class="t-note">   fenêtrage et rendu PNG (utilisé par 6)</span>
 │   ├── make_testbench.py   <span class="t-note">6. métriques + PNG de tous les sCT → testbench.csv</span>
+│   ├── dose.py             <span class="t-note">   facultatif : métriques de dose (gamma, DVH)</span>
 │   ├── <span class="t-dir">splits/</span>             <span class="t-note">le découpage, versionné dans git</span>
 │   └── <span class="t-dir">work/</span>               <span class="t-note">cache, checkpoints, sCT, PNG : jamais dans git</span>
 │
@@ -615,6 +612,8 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
           <div class="term"><b>PSNR, SSIM</b><span>Deux autres mesures de ressemblance au vrai CT. PSNR en dB, SSIM de 0 à 1 (structure : contours, textures). Plus elles sont hautes, meilleur est le sCT.</span></div>
           <div class="term"><b>Modèle pré-entraîné</b><span>Un réseau déjà entraîné par d'autres et publié. Ici Li, Fu et Spadea (FedSynthCT-Brain), qu'on utilise sans les réentraîner.</span></div>
           <div class="term"><b>Corrélation de Spearman</b><span>Mesure si deux classements vont dans le même sens : +1 identiques, 0 sans lien, −1 inversés. Ici : classement par note du VLM contre classement par MAE.</span></div>
+          <div class="term"><b>Gamma 2 %/2 mm</b><span>Compare deux cartes de dose : un point passe si l'écart de dose est sous 2 % ou si la même dose se trouve à moins de 2 mm. On donne le pourcentage de points qui passent.</span></div>
+          <div class="term"><b>DVH, D98, D2</b><span>Histogramme dose-volume d'une structure. D98 : dose reçue par au moins 98 % de la cible (sa couverture) ; D2 : dose des 2 % les plus irradiés (son point chaud).</span></div>
           <div class="term"><b>AUROC</b><span>Probabilité qu'un sCT acceptable reçoive une meilleure note qu'un sCT non acceptable. 1 = juge parfait, 0,5 = juge au hasard.</span></div>
           <div class="term"><b>VLM</b><span>Modèle vision-langage : il reçoit une image et une consigne (le prompt), et répond en texte.</span></div>
           <div class="term"><b>Ollama</b><span>Le logiciel qui fait tourner les VLM sur la station, sans rien envoyer sur Internet.</span></div>
@@ -818,6 +817,43 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
                 <tr><td><code>maybe_seen_in_training</code></td><td>1 si le générateur a peut-être été entraîné sur ce patient</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      
+        <div class="subsection" id="dose">
+          <div class="fiche">
+            <div class="fiche-head"><span class="file">dose.py</span><span class="role">facultatif : le sCT donne-t-il la même dose que le vrai CT ?</span></div>
+            <dl>
+              <dt>Lit</dt><dd>Les mêmes sCT que <code>make_testbench.py</code>, le vrai CT et le masque du corps.</dd>
+              <dt>Écrit</dt><dd><code>work/testbench/&lt;split&gt;/dose_metrics.csv</code>, une ligne par (patient, générateur, modalité), et les doses de référence dans <code>work/dose/&lt;split&gt;/&lt;patient&gt;/</code> pour vérification dans 3D Slicer.</dd>
+              <dt>Utilise</dt><dd><a href="https://github.com/e0404/pyRadPlan">pyRadPlan</a>, le portage Python de matRad (DKFZ), pour planifier et calculer la dose ; <a href="https://docs.pymedphys.com/">PyMedPhys</a> pour le gamma.</dd>
+              <dt>À retenir</dt><dd>Tourne sur le processeur, donc en même temps que le benchmark des VLM si on veut. <b>Pas besoin de refaire le benchmark</b> après : il suffit de relancer <code>analyze.py</code>, qui lit ce fichier tout seul.</dd>
+            </dl>
+          </div>
+          <div class="prose">
+            <p>Le principe est celui du challenge SynthRAD2023. Pour chaque patient :</p>
+            <ol>
+              <li>on définit une cible sphérique de 15 mm de rayon au centre des tissus mous de la tête, et une prescription de 60 Gy ;</li>
+              <li>on optimise un plan sur le <b>vrai CT</b> : photons (IMRT, 5 faisceaux de 6 MV) et protons (2 faisceaux latéraux), normalisé pour que la dose moyenne dans la cible vaille 60 Gy ;</li>
+              <li>on recalcule <b>exactement le même plan</b> (mêmes faisceaux, mêmes poids) sur chaque sCT ;</li>
+              <li>on compare les deux doses.</li>
+            </ol>
+            <p>Les protons sont bien plus sensibles aux erreurs du sCT que les photons : une erreur de densité décale l'endroit où le faisceau s'arrête. C'est pourquoi on calcule les deux. Sur une tête de taille réelle, compter environ 20 s pour optimiser un plan et 2 à 7 s pour le recalculer sur un sCT, soit quelques minutes par patient.</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Colonne (pour photons et protons)</th><th>Contenu</th><th>Meilleur si</th></tr></thead>
+              <tbody>
+                <tr><td><code>gamma_photons</code>, <code>gamma_protons</code></td><td>taux de réussite gamma 2 %/2 mm, sur les points qui reçoivent plus de 10 % du maximum</td><td>plus haut</td></tr>
+                <tr><td><code>dose_diff_…</code></td><td>écart de dose moyen sur ces mêmes points, en % de la prescription</td><td>plus bas</td></tr>
+                <tr><td><code>ptv_d98_…</code>, <code>ptv_d2_…</code></td><td>écart de D98 (couverture) et de D2 (point chaud) de la cible, en % de la prescription</td><td>plus bas</td></tr>
+                <tr><td><code>body_dmean_…</code></td><td>écart de dose moyenne dans le corps, en % de la prescription</td><td>plus bas</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout warn">
+            <span class="label">Une cible inventée, à dire dans le rapport</span>
+            <p>SynthRAD2023 ne fournit ni contours ni plans cliniques. La cible, la prescription et les faisceaux sont donc les nôtres (section « Métriques de dose » de <code>config.py</code>). Ces métriques mesurent l'effet des erreurs du sCT sur un plan réaliste du cerveau, pas sur le vrai plan du patient. La ligne affichée pour chaque plan donne sa couverture (D98 de la cible, en % de la prescription) : un plan correct est au-dessus de 90 %.</p>
           </div>
         </div>
       </section>
@@ -1052,7 +1088,7 @@ git add Synthesis/sct_generation/splits/task1_brain.csv
 git commit -m "Split train/val/test du cerveau"
 git push</code></pre>
               </div>
-              <p>Sur la station, le fichier existe déjà (c'est elle qui l'a créé), mais git ne le connaît pas encore. Au prochain <code>git pull</code>, il faudra d'abord le mettre de côté : voir l'étape 16.</p>
+              <p>Sur la station, le fichier existe déjà (c'est elle qui l'a créé), mais git ne le connaît pas encore. Au prochain <code>git pull</code>, il faudra d'abord le mettre de côté : voir l'étape 10.</p>
             </div>
           </li>
 
@@ -1104,8 +1140,25 @@ ls work/runs/unet_baseline/checkpoints</code></pre>
 
           <li>
             <div class="step-body">
+              <h3>Mettre à jour le code de la station <span class="where-tag">station</span></h3>
+              <p>À faire <b>une fois l'entraînement terminé</b> (pas pendant : <code>uv sync</code> pourrait remplacer des bibliothèques qu'il utilise), et seulement après avoir poussé la dernière version depuis ton PC (étape 1, avec <code>uv lock</code>).</p>
+              <div class="code nolabel">
+<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
+git status --short                                   <span class="c"># ce que la station a modifié ou créé</span>
+git checkout -- Synthesis/uv.lock                    <span class="c"># si « M Synthesis/uv.lock » apparaît</span>
+mv Synthesis/sct_generation/splits/task1_brain.csv ~/task1_brain.csv.bak   <span class="c"># si « ?? …/splits/ » apparaît</span>
+git pull
+diff ~/task1_brain.csv.bak Synthesis/sct_generation/splits/task1_brain.csv &amp;&amp; echo "split identique"
+cd Synthesis &amp;&amp; uv sync</code></pre>
+              </div>
+              <p class="expect"><code>git pull</code> doit se terminer sans « error », et le <code>diff</code> doit afficher <b>split identique</b>. Les deux commandes de rangement ne servent qu'une fois : ensuite, un simple <code>git pull</code> suffit. Cette étape est nécessaire dans tous les cas, que tu lances la suite à la main (étapes 11 à 16) ou d'un coup (étape 17).</p>
+            </div>
+          </li>
+
+          <li>
+            <div class="step-body">
               <h3>Générer les sCT <span class="where-tag">station</span></h3>
-              <p>Les étapes 10 à 15 détaillent chaque script, à lancer à la main. Pour tout enchaîner en une commande, passe directement aux étapes 16 et 17 : le script <code>run_all.sh</code> lance exactement ces mêmes commandes, dans l'ordre.</p>
+              <p>Les étapes 11 à 16 détaillent chaque script, à lancer à la main. <b>C'est l'un ou l'autre</b> : pour tout enchaîner en une commande, saute directement à l'étape 17, dont le script <code>run_all.sh</code> lance exactement ces mêmes commandes, dans l'ordre.</p>
               <div class="code nolabel">
 <pre><code>uv run python predict.py --run unet_baseline               <span class="c"># patients de test, tous les checkpoints</span>
 uv run python predict.py --run unet_baseline --split val   <span class="c"># patients de val, pour régler le juge</span></code></pre>
@@ -1179,30 +1232,22 @@ uv run python benchmark.py --testbench $TB --pull     <span class="c"># + télé
 <pre><code>uv run python analyze.py --testbench ../sct_generation/work/testbench/val/gray/testbench.csv</code></pre>
               </div>
               <p class="expect">Le nombre de notes rattachées, la répartition acceptables / non acceptables, puis le <b>leaderboard</b> trié du meilleur juge au moins bon. Tout est écrit dans <b>Synthesis/results/analysis/val_gray/</b>. Le choix du prompt et du rendu se fait sur ces résultats de val ; ensuite seulement, on construit le banc d'essai de test, on lance le benchmark dessus et on l'analyse de la même façon.</p>
-            </div>
-          </li>
-
-          <li>
-            <div class="step-body">
-              <h3>Mettre à jour le code de la station <span class="where-tag">station</span></h3>
-              <p>À faire <b>une fois l'entraînement terminé</b> (pas pendant : <code>uv sync</code> pourrait remplacer des bibliothèques qu'il utilise), et seulement après avoir poussé la dernière version depuis ton PC (étape 1, avec <code>uv lock</code>).</p>
+              <p><b>Métriques de dose (facultatif).</b> Elles se calculent à part, sur le processeur, par exemple dans une deuxième fenêtre tmux pendant le benchmark. Ensuite, on relance seulement <code>analyze.py</code> : pas besoin de refaire le benchmark, les notes des VLM ne changent pas.</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
-git status --short                                   <span class="c"># ce que la station a modifié ou créé</span>
-git checkout -- Synthesis/uv.lock                    <span class="c"># si « M Synthesis/uv.lock » apparaît</span>
-mv Synthesis/sct_generation/splits/task1_brain.csv ~/task1_brain.csv.bak   <span class="c"># si « ?? …/splits/ » apparaît</span>
-git pull
-diff ~/task1_brain.csv.bak Synthesis/sct_generation/splits/task1_brain.csv &amp;&amp; echo "split identique"
-cd Synthesis &amp;&amp; uv sync</code></pre>
+<pre><code>cd ../sct_generation
+uv run python dose.py --split val --max-patients 2    <span class="c"># essai : vérifier que les plans sont corrects</span>
+uv run python dose.py --split val
+cd ../pipeline
+uv run python analyze.py --testbench ../sct_generation/work/testbench/val/gray/testbench.csv</code></pre>
               </div>
-              <p class="expect"><code>git pull</code> doit se terminer sans « error », et le <code>diff</code> doit afficher <b>split identique</b>. Les deux premières commandes de rangement ne servent qu'une fois : ensuite, un simple <code>git pull</code> suffit.</p>
+              <p class="expect">Pour chaque patient, une ligne par plan avec sa couverture (<b>D98 de la cible</b> au-dessus de 90 % de la prescription), puis une ligne par sCT avec son <b>taux gamma</b> et son <b>écart de dose</b>. L'analyse affiche ensuite « Métriques de dose ajoutées », et <code>correlations.csv</code> gagne les colonnes <code>spearman_gamma_photons</code>, <code>spearman_gamma_protons</code>…</p>
             </div>
           </li>
 
           <li>
             <div class="step-body">
               <h3>Tout enchaîner : essai rapide, puis val <span class="where-tag">station</span></h3>
-              <p><code>run_all.sh</code> lance à la suite les étapes 10 à 15 : sCT du U-Net, sCT de Li, Fu et Spadea, banc d'essai, benchmark des VLM installés, analyse. Chaque étape saute ce qui est déjà fait : après une coupure, on relance la même commande. On commence par un <b>essai complet sur deux patients de val</b>, pour vérifier toute la chaîne avant les longs calculs :</p>
+              <p><code>run_all.sh</code> lance à la suite les étapes 11 à 16 (inutile de les avoir faites à la main avant) : sCT du U-Net, sCT de Li, Fu et Spadea, banc d'essai, benchmark des VLM installés, analyse. Chaque étape saute ce qui est déjà fait : après une coupure, on relance la même commande. On commence par un <b>essai complet sur deux patients de val</b>, pour vérifier toute la chaîne avant les longs calculs :</p>
               <div class="code nolabel">
 <pre><code>tmux new -s chaine
 cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
@@ -1218,6 +1263,7 @@ MODELS="medgemma:latest gemma4:latest" bash run_all.sh val   <span class="c"># v
               <div class="code nolabel">
 <pre><code>PROMPTS="realism_v1 brain_rubric_v1 defects_v1" bash run_all.sh val gray 2&gt;&amp;1 | tee prompts.log</code></pre>
               </div>
+              <p>Pour ajouter les métriques de dose dans la même commande, mettre <code>DOSE=1</code> devant, par exemple <code>DOSE=1 bash run_all.sh val</code>. Si le benchmark est déjà fait, c'est inutile de tout relancer : voir la fin de l'étape 16.</p>
               <p class="expect">Le leaderboard de <b>results/analysis/val_gray/</b> a alors une ligne par couple (modèle, prompt). On garde le meilleur prompt et on le met dans <code>DEFAULT_PROMPT</code> avant le test.</p>
               <p class="expect">Deux dossiers de résultats : <b>results/analysis/val_gray/</b> et <b>results/analysis/val_rgb3/</b>. On compare leurs <code>leaderboard.csv</code> pour choisir le style de rendu (et, si on en a essayé plusieurs, le prompt). C'est la mise au point du juge : elle se fait uniquement sur val.</p>
             </div>
@@ -1229,7 +1275,7 @@ MODELS="medgemma:latest gemma4:latest" bash run_all.sh val   <span class="c"># v
               <p>Une seule fois, quand le style de rendu et le prompt sont choisis. Le script refuse de se lancer sur test sans qu'on lui donne le style.</p>
               <div class="code nolabel">
 <pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
-bash run_all.sh test gray 2&gt;&amp;1 | tee test.log     <span class="c"># remplacer gray par le style choisi sur val</span></code></pre>
+DOSE=1 bash run_all.sh test gray 2&gt;&amp;1 | tee test.log     <span class="c"># remplacer gray par le style choisi sur val</span></code></pre>
               </div>
               <p class="expect">Banc d'essai de <b>810 images</b> (27 patients × 10 générateurs × 3 coupes), puis le leaderboard à rapporter dans <b>results/analysis/test_gray/</b>. Le prompt utilisé est <code>DEFAULT_PROMPT</code> de <code>pipeline/config.py</code> : y mettre celui choisi sur val avant de lancer (ou passer <code>PROMPTS="&lt;nom&gt;"</code> devant la commande).</p>
             </div>
@@ -1259,7 +1305,7 @@ scp -r student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_me
             <li><b>Valider la nouvelle chaîne sur la station.</b> <code>pretrained.py</code>, <code>make_testbench.py</code> et <code>analyze.py</code> ont été testés sur des données factices, pas encore sur SynthRAD. Premier passage avec l'essai rapide de l'étape 17 (deux patients de val), en ouvrant les PNG et les montages pour vérifier à l'œil.</li>
             <li><b>Mise au point du juge sur val.</b> Comparer plusieurs prompts (<code>PROMPTS</code>) et les deux styles de rendu (<code>gray</code>, <code>rgb3</code>) sur les sCT de val, avec <code>analyze.py</code>, et garder la meilleure combinaison. Ne jamais faire ces réglages en regardant les résultats du test.</li>
             <li><b>Benchmark final sur test</b> avec tous les modèles, une seule fois (étape 18) : c'est le leaderboard à rapporter.</li>
-            <li><b>Métriques de dose.</b> Gamma 2 %/2 mm et écarts de DVH demandent un moteur de calcul de dose (par exemple matRad ou OpenTPS) et des plans de traitement : elles ne sont pas encore calculées. Une fois disponibles, il suffit de les ajouter comme colonnes de <code>testbench.csv</code> et à la liste <code>METRICS</code> de <code>analyze.py</code>.</li>
+            <li><b>Métriques de dose.</b> <code>dose.py</code> calcule gamma et écarts de DVH en photons et en protons, sur un plan optimisé sur le vrai CT avec une cible sphérique (SynthRAD n'a pas de contours). À vérifier sur la station : couverture des plans (D98 de la cible) et quelques doses de référence ouvertes dans 3D Slicer.</li>
             <li><b>Rapport.</b> Discuter les intervalles de confiance (27 patients, c'est peu), la corrélation à anatomie égale (<code>spearman_intra</code>), le biais possible des modèles pré-entraînés sur le centre C, et le gain du filtrage (<code>filtering.csv</code>).</li>
           </ol>
         </div>
@@ -1285,12 +1331,15 @@ scp -r student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_me
               <tr><td><code>scp</code> sous Windows : « open local … : Unknown error »</td><td>Le dossier de destination n'existe pas sur le PC, ou la commande n'est pas lancée depuis la racine du dépôt.</td><td>Se placer à la racine du dépôt, créer le dossier avec <code>mkdir</code>, puis relancer le <code>scp</code> en donnant le nom complet du fichier de destination.</td></tr>
               <tr><td>« … introuvable (voir PRETRAINED_PYTHON / PRETRAINED_SCRIPT) »</td><td>Script lancé hors de la station, ou installation de Vincent déplacée.</td><td>Lancer sur la station. Vérifier les chemins avec <code>ls</code> (voir son guide <code>/home/student/SYNTHETIC_CT/GUIDE.md</code>) et corriger <code>sct_generation/config.py</code>.</td></tr>
               <tr><td>« patient(s) en échec » dans <code>pretrained.py</code></td><td>Le script de Vincent s'est arrêté pour ce patient (son message s'affiche juste au-dessus).</td><td>Relancer la même commande : seuls les patients manquants sont refaits. Si l'erreur persiste, la transmettre à Vincent avec le message.</td></tr>
-              <tr><td>« Aucun sCT trouvé pour la partie … »</td><td><code>make_testbench.py</code> lancé avant <code>predict.py</code> ou <code>pretrained.py</code> sur cette partie.</td><td>Générer d'abord les sCT avec le même <code>--split</code> (étapes 10 et 11).</td></tr>
+              <tr><td>« Aucun sCT trouvé pour la partie … »</td><td><code>make_testbench.py</code> lancé avant <code>predict.py</code> ou <code>pretrained.py</code> sur cette partie.</td><td>Générer d'abord les sCT avec le même <code>--split</code> (étapes 11 et 12).</td></tr>
               <tr><td>« … n'est pas sur la grille du CT : rééchantillonnage »</td><td>Un sCT a été écrit avec une autre taille ou un autre espacement de voxels que le CT.</td><td>Rien à faire : il est ramené sur la grille du CT avant le calcul. Si c'est le cas de tous les sCT d'un modèle, le signaler à son auteur.</td></tr>
               <tr><td>« une seule classe, l'AUROC n'est pas calculable »</td><td>Toutes les coupes sont du même côté du seuil d'acceptabilité.</td><td>Ajuster <code>ACCEPTABLE_THRESHOLD</code> dans <code>pipeline/config.py</code> d'après la répartition des MAE (<code>generators.csv</code>).</td></tr>
+              <tr><td>« pyRadPlan n'est pas installé »</td><td>L'environnement n'a pas été mis à jour après le <code>git pull</code>.</td><td><code>uv sync</code> dans <code>Synthesis/</code> (étape 10).</td></tr>
+              <tr><td><code>uv sync</code> échoue sur <code>numba</code> ou <code>llvmlite</code></td><td>La version de Python choisie par uv est trop récente pour ces bibliothèques.</td><td>Dans <code>Synthesis/</code> : <code>uv python pin 3.12</code> puis <code>uv sync</code>.</td></tr>
+              <tr><td>« D98 de la cible = 60 % de la prescription » (bien moins de 90 %)</td><td>Le plan optimisé sur le vrai CT couvre mal la cible, souvent parce qu'elle touche le bord du corps.</td><td>Ouvrir <code>work/dose/…/dose_ct_*.nii.gz</code> dans 3D Slicer, puis ajuster <code>DOSE_TARGET_RADIUS_MM</code> ou les angles dans <code>config.py</code>, supprimer <code>dose_metrics.csv</code> et relancer.</td></tr>
               <tr><td>« réponse coupée après … tokens »</td><td>Le modèle s'est mis à répéter du texte sans fin.</td><td>Normal de temps en temps pour les petits modèles : l'image est comptée en erreur. Si c'est fréquent, essayer un autre prompt.</td></tr>
-              <tr><td><code>git pull</code> refuse : « Your local changes … uv.lock »</td><td><code>uv</code> a mis à jour <code>uv.lock</code> sur la station parce que <code>pyproject.toml</code> avait changé sans lui.</td><td>Sur la station, depuis la racine du dépôt : <code>git checkout -- Synthesis/uv.lock</code> puis <code>git pull</code> et <code>uv sync</code> (étape 16). À l'avenir, lancer <code>uv lock</code> sur le PC avant de commiter (étape 1).</td></tr>
-              <tr><td><code>git pull</code> refuse : « untracked working tree files would be overwritten … task1_brain.csv »</td><td>Le split a été créé sur la station puis poussé depuis le PC : la station a une copie que git ne suit pas.</td><td>Le mettre de côté avec <code>mv</code>, faire le <code>git pull</code>, puis vérifier avec <code>diff</code> que c'est le même (étape 16).</td></tr>
+              <tr><td><code>git pull</code> refuse : « Your local changes … uv.lock »</td><td><code>uv</code> a mis à jour <code>uv.lock</code> sur la station parce que <code>pyproject.toml</code> avait changé sans lui.</td><td>Sur la station, depuis la racine du dépôt : <code>git checkout -- Synthesis/uv.lock</code> puis <code>git pull</code> et <code>uv sync</code> (étape 10). À l'avenir, lancer <code>uv lock</code> sur le PC avant de commiter (étape 1).</td></tr>
+              <tr><td><code>git pull</code> refuse : « untracked working tree files would be overwritten … task1_brain.csv »</td><td>Le split a été créé sur la station puis poussé depuis le PC : la station a une copie que git ne suit pas.</td><td>Le mettre de côté avec <code>mv</code>, faire le <code>git pull</code>, puis vérifier avec <code>diff</code> que c'est le même (étape 10).</td></tr>
               <tr><td>L'entraînement s'arrête quand je ferme le terminal</td><td>Le programme était attaché à la connexion SSH.</td><td>Le lancer dans <code>tmux</code> ou avec <code>nohup</code> (étape 8).</td></tr>
               <tr><td>« CUDA out of memory » pendant l'entraînement</td><td>Le GPU est déjà occupé, par exemple par un VLM chargé.</td><td>Vérifier <code>nvidia-smi</code>, attendre qu'il se libère, ou réduire <code>BATCH_SIZE</code> dans <code>sct_generation/config.py</code>.</td></tr>
             </tbody>

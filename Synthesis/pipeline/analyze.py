@@ -14,6 +14,11 @@ grâce à item_id, puis compare, pour chaque couple (modèle, prompt), les notes
     scores_and_metrics.csv   chaque note avec les métriques de l'image notée
     scatter.png              note du VLM en fonction de la métrique de référence, par modèle
 
+Métriques de dose : si sct_generation/dose.py a tourné sur la même partie du split, son fichier
+work/testbench/<split>/dose_metrics.csv est lu automatiquement et ses colonnes (gamma_photons,
+dose_diff_protons...) sont ajoutées aux métriques analysées. Pas besoin de refaire le benchmark :
+les notes des VLM ne changent pas, il suffit de relancer ce script.
+
 Lecture des corrélations : le signe est orienté pour que +1 veuille toujours dire « le VLM
 donne les meilleures notes aux meilleurs sCT », 0 « aucun lien » et -1 « l'inverse »
 (pour la MAE, où plus bas = meilleur, on change donc le signe). Un juge qui donne toujours
@@ -48,7 +53,9 @@ from scipy.stats import pearsonr, rankdata, spearmanr
 
 import config
 
-METRICS = ["mae_hu_slice", "psnr_db_slice", "ssim_slice", "mae_hu", "psnr_db", "ssim"]
+IMAGE_METRICS = ["mae_hu_slice", "psnr_db_slice", "ssim_slice", "mae_hu", "psnr_db", "ssim"]
+DOSE_METRICS = ["gamma", "dose_diff", "ptv_d98", "ptv_d2", "body_dmean"]  # voir sct_generation/dose.py
+METRICS = list(IMAGE_METRICS)  # complétée par les colonnes de dose si elles existent (add_dose_metrics)
 METRIC_LABELS = {
     "mae_hu_slice": "MAE de la coupe (HU)",
     "psnr_db_slice": "PSNR de la coupe (dB)",
@@ -56,6 +63,8 @@ METRIC_LABELS = {
     "mae_hu": "MAE du volume (HU)",
     "psnr_db": "PSNR du volume (dB)",
     "ssim": "SSIM du volume",
+    **{f"gamma_{m}": f"Taux gamma 2 %/2 mm, {m} (%)" for m in ("photons", "protons")},
+    **{f"dose_diff_{m}": f"Écart de dose moyen, {m} (% de la prescription)" for m in ("photons", "protons")},
 }
 JUDGE_KEY = ["model", "prompt_name"]
 
@@ -66,12 +75,12 @@ def load_judgements(path):
     """Renvoie (notes réussies, notes restées en erreur), sans doublons."""
     if not path.exists():
         raise SystemExit(f"{path} introuvable : lancer d'abord benchmark.py.")
-    judgements = pd.read_csv(path)
+    judgements = pd.read_csv(path, dtype={"error": str})
     if judgements.empty:
         raise SystemExit(f"{path} est vide : lancer d'abord benchmark.py.")
 
     key = JUDGE_KEY + ["item_id"]
-    judgements["error"] = judgements["error"].fillna("").astype(str)
+    judgements["error"] = judgements["error"].fillna("")
     ok = judgements[judgements["error"] == ""].drop_duplicates(key, keep="last")
 
     # Une image en erreur puis réussie au second essai ne compte pas comme une erreur.
@@ -79,6 +88,21 @@ def load_judgements(path):
     failed = failed.merge(ok[key], on=key, how="left", indicator=True)
     failed = failed[failed["_merge"] == "left_only"].drop(columns="_merge")
     return ok, failed
+
+
+def add_dose_metrics(testbench, testbench_csv):
+    """Ajoute au banc d'essai les métriques de dose de dose.py, s'il a tourné. Renvoie leurs noms."""
+    dose_csv = testbench_csv.parent.parent / "dose_metrics.csv"
+    if not dose_csv.exists():
+        return testbench, []
+    dose = pd.read_csv(dose_csv).drop_duplicates(["patient_id", "generator", "modality"], keep="last")
+    wide = dose.pivot_table(index=["patient_id", "generator"], columns="modality", values=DOSE_METRICS)
+    wide.columns = [f"{metric}_{modality}" for metric, modality in wide.columns]
+    columns = [f"{metric}_{modality}" for modality in sorted(dose["modality"].unique()) for metric in DOSE_METRICS]
+    testbench = testbench.merge(wide.reset_index(), on=["patient_id", "generator"], how="left")
+    n_with_dose = testbench[columns[0]].notna().sum()
+    print(f"Métriques de dose ajoutées depuis {dose_csv.name} : {n_with_dose} / {len(testbench)} images.")
+    return testbench, columns
 
 
 # --- Statistiques -------------------------------------------------------------------
@@ -243,6 +267,7 @@ def generator_table(testbench):
         psnr_db_mean=("psnr_db", "mean"),
         ssim_mean=("ssim", "mean"),
         n_maybe_seen=("maybe_seen_in_training", "sum"),
+        **{f"{m}_mean": (m, "mean") for m in METRICS if m not in IMAGE_METRICS},
     )
     # MAE par centre : utile pour repérer un générateur qui a déjà vu les patients d'un centre.
     by_center = volumes.pivot_table(index="generator", columns="center", values="mae_hu", aggfunc="mean")
@@ -312,6 +337,8 @@ def main():
     if not testbench_csv.exists():
         raise SystemExit(f"{testbench_csv} introuvable : lancer d'abord make_testbench.py.")
     testbench = pd.read_csv(testbench_csv)
+    testbench, dose_columns = add_dose_metrics(testbench, testbench_csv)
+    METRICS.extend(dose_columns)
     ok, failed = load_judgements(Path(args.judgements))
 
     # Seules les notes des images de CE banc d'essai sont gardées (pas celles d'un autre split

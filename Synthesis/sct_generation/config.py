@@ -97,3 +97,36 @@ DEFAULT_RENDER_STYLE = "gray"
 # parfaitement noir pour les modèles pré-entraînés) au lieu de juger l'anatomie.
 # Les métriques, elles, sont toujours calculées dans le masque.
 MASK_OUTSIDE_BODY = True
+
+# --- Métriques de dose (dose.py) -----------------------------------------------
+
+# Principe (celui de SynthRAD2023) : on optimise un plan de traitement sur le vrai CT, puis on
+# recalcule exactement le même plan (mêmes faisceaux, mêmes poids) sur chaque sCT, et on compare
+# les deux doses. Le calcul de dose est fait par pyRadPlan (portage Python de matRad, DKFZ).
+DOSE_MODALITIES = ["photons", "protons"]
+
+# SynthRAD2023 ne fournit ni contours ni plans cliniques. On définit donc pour chaque patient une
+# cible sphérique (PTV) de DOSE_TARGET_RADIUS_MM, centrée sur les tissus mous de la tête (le
+# cerveau pour l'essentiel). Toutes les métriques de dose dépendent de ce choix : le dire dans le rapport.
+DOSE_TARGET_RADIUS_MM = 15.0
+DOSE_PRESCRIPTION_GY = 60.0       # 60 Gy : dose classique d'un gliome
+DOSE_GRID_MM = 3.0                # grille de calcul de la dose
+DOSE_GANTRY_ANGLES = {
+    "photons": [0, 72, 144, 216, 288],   # IMRT 5 faisceaux coplanaires
+    "protons": [90, 270],                # 2 faisceaux latéraux opposés
+}
+
+# Gamma : critère global 2 % / 2 mm, sur les voxels qui reçoivent plus de 10 % de la dose
+# maximale (critères de SynthRAD2023). Les doses sont ramenées sur une grille de GAMMA_GRID_MM
+# avant le calcul, pour qu'il reste rapide.
+GAMMA_DOSE_PERCENT = 2.0
+GAMMA_DISTANCE_MM = 2.0
+GAMMA_CUTOFF_PERCENT = 10.0
+GAMMA_GRID_MM = 2.0
+
+# Le calcul de dose tourne sur le processeur : le GPU reste libre pour Ollama, et dose.py peut
+# tourner en même temps que le benchmark des VLM.
+DOSE_USE_GPU = False
+
+# Doses de référence (plan sur le vrai CT), enregistrées pour pouvoir les vérifier à l'œil.
+DOSE_DIR = WORK_DIR / "dose"

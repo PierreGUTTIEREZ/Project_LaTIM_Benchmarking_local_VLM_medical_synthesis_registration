@@ -42,7 +42,7 @@ station et le prochain `git pull` y sera bloqué.
 1. Découper SynthRAD2023 en train / val / test **par patient** (`make_split.py`).
 2. Entraîner le U-Net sur train, régler sur val, en sauvegardant des checkpoints à plusieurs époques (`preprocess.py`, `train.py`).
 3. Prédire les sCT avec chaque checkpoint (`predict.py`) et avec les trois modèles pré-entraînés Li, Fu, Spadea (`pretrained.py`) : on obtient des sCT allant du mauvais au bon.
-4. Calculer les métriques (MAE, PSNR, SSIM) contre le vrai CT et rendre les coupes en PNG (`make_testbench.py`).
+4. Calculer les métriques (MAE, PSNR, SSIM) contre le vrai CT et rendre les coupes en PNG (`make_testbench.py`) ; en option, les métriques de dose (`dose.py`).
 5. Faire noter les PNG par les VLM (`benchmark.py`), d'abord sur val pour régler prompt et rendu, puis une seule fois sur test.
 6. Corréler les notes avec les métriques et produire le leaderboard (`analyze.py`).
 
@@ -54,4 +54,4 @@ bash run_all.sh val                       # mise au point du juge sur val (style
 bash run_all.sh test gray                 # résultats finaux, avec le style choisi sur val
 ```
 
-Les métriques de dose (gamma, DVH) demandent un moteur de calcul de dose : elles ne sont pas encore calculées.
+Les métriques de dose (gamma, DVH) sont calculées par `sct_generation/dose.py`, à part : elles s'ajoutent à l'analyse sans refaire le benchmark (`DOSE=1 bash run_all.sh ...`, ou `dose.py` puis `analyze.py`).

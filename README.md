@@ -77,7 +77,7 @@ Hypothèses à tester :
 
 1. Générer ou récupérer des pseudo-CT de qualité variée : un U-Net entraîné par nos soins, gardé à différents stades d'entraînement, et trois modèles pré-entraînés publiés (FedSynthCT-Brain : Li, Fu, Spadea, via [SlicerModalityConverter](https://github.com/ciroraggio/SlicerModalityConverter)).
 2. Calculer les métriques image : **MAE, PSNR, SSIM**.
-3. Calculer les métriques aval : **gamma analysis (2 %/2 mm)**, écarts de **DVH**, D<sub>max</sub>, D<sub>mean</sub>.
+3. Calculer les métriques aval : **gamma analysis (2 %/2 mm)**, écarts de **DVH**, D<sub>max</sub>, D<sub>mean</sub>. Faute de plans cliniques dans SynthRAD2023, on optimise un plan (photons et protons, cible sphérique) sur le vrai CT avec [pyRadPlan](https://github.com/e0404/pyRadPlan), puis on le recalcule sur chaque sCT.
 4. Faire juger chaque sCT par les VLM (score 0–100 et justification).
 5. Corréler score VLM, métriques image et métriques de dose.
 
@@ -351,6 +351,7 @@ Les données et tout ce qui en est dérivé (volumes pré-traités, checkpoints,
 - Hering *et al.*, « Learn2Reg », *IEEE TMI*, 2023.
 - Huijben *et al.*, « SynthRAD2023 challenge report », *Medical Image Analysis*, 2024.
 - Raggio *et al.*, « FedSynthCT-Brain: A federated learning framework for multi-institutional brain MRI-to-CT synthesis », *Computers in Biology and Medicine*, 2025, [doi:10.1016/j.compbiomed.2025.110160](https://doi.org/10.1016/j.compbiomed.2025.110160). Modèles Li, Fu et Spadea utilisés via [SlicerModalityConverter](https://github.com/ciroraggio/SlicerModalityConverter) (usage recherche uniquement).
+- Becher *et al.*, pyRadPlan, portage Python de matRad (DKFZ, licence BSD-3), [github.com/e0404/pyRadPlan](https://github.com/e0404/pyRadPlan) : calcul et optimisation de dose. Gamma calculé avec [PyMedPhys](https://docs.pymedphys.com/).
 - Menze *et al.*, « The Multimodal Brain Tumor Image Segmentation Benchmark (BraTS) », *IEEE TMI*, 2015.
 
 **Outils :** [MONAI](https://monai.io) · [SimpleITK](https://simpleitk.org) · [Ollama](https://ollama.com) · [itk-elastix](https://github.com/InsightSoftwareConsortium/ITKElastix)

@@ -118,7 +118,12 @@ TARGET_METRIC = "mae_hu_slice"
 # Métriques où « plus bas = meilleur ». On change le signe de leurs corrélations pour que,
 # dans tous les tableaux, une valeur proche de +1 veuille dire « le VLM donne les meilleures
 # notes aux meilleurs sCT », et une valeur proche de 0 « le VLM note au hasard ».
-LOWER_IS_BETTER = {"mae_hu", "mae_hu_slice"}
+# Les écarts de dose (sct_generation/dose.py) en font partie ; le taux gamma, non.
+LOWER_IS_BETTER = {"mae_hu", "mae_hu_slice"} | {
+    f"{metric}_{modality}"
+    for metric in ("dose_diff", "ptv_d98", "ptv_d2", "body_dmean")
+    for modality in ("photons", "protons")
+}
 
 # AUROC : un sCT est « acceptable » si sa MAE sur la coupe est sous ce seuil (en HU).
 # L'AUROC mesure si le VLM sépare les acceptables des autres (1 = parfait, 0,5 = hasard).

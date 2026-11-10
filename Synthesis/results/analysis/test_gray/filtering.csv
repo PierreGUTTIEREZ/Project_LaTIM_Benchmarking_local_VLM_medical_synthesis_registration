@@ -1,0 +1,6 @@
+model,prompt_name,n_images,n_kept,mae_hu_slice_random,mae_hu_slice_judge,mae_hu_slice_oracle,gain_vs_oracle
+moondream:latest,realism_v1,810,405,133.11,133.11,85.771,0.0
+medgemma:latest,realism_v1,810,405,133.11,118.349,85.771,0.312
+llava:7b,realism_v1,810,405,133.11,126.901,85.771,0.131
+gemma4:latest,realism_v1,810,405,133.11,129.899,85.771,0.068
+qwen3-vl:8b,realism_v1,26,13,158.392,165.47,103.084,-0.128

@@ -1,0 +1,11 @@
+model,prompt_name,spearman_mae_hu_slice,spearman_psnr_db_slice,spearman_ssim_slice,spearman_mae_hu,spearman_psnr_db,spearman_ssim,spearman_gamma_photons,spearman_dose_diff_photons,spearman_ptv_d98_photons,spearman_ptv_d2_photons,spearman_body_dmean_photons,spearman_gamma_protons,spearman_dose_diff_protons,spearman_ptv_d98_protons,spearman_ptv_d2_protons,spearman_body_dmean_protons
+moondream:latest,realism_v1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+medgemma:latest,realism_v1,-0.011,0.005,0.055,-0.012,0.014,0.053,-0.011,-0.105,-0.141,-0.129,0.01,-0.06,-0.072,0.047,-0.093,-0.131
+llava:7b,realism_v1,-0.227,-0.21,-0.193,-0.142,-0.096,-0.097,0.002,-0.102,-0.185,-0.206,0.024,-0.175,-0.197,-0.056,-0.171,-0.208
+gemma4:latest,realism_v1,0.109,0.128,0.17,0.246,0.297,0.32,0.16,0.103,-0.068,-0.077,0.208,0.013,0.015,0.043,-0.045,-0.08
+qwen3-vl:8b,realism_v1,0.232,0.22,0.23,0.229,0.243,0.237,0.199,0.196,0.129,0.109,0.209,0.154,0.142,0.029,0.089,0.09
+minicpm-v:8b,realism_v1,0.007,-0.009,0.001,-0.007,-0.006,-0.004,-0.011,-0.007,0.035,0.05,-0.023,0.008,0.02,-0.042,0.046,0.036
+llava:13b,realism_v1,0.16,0.165,0.173,0.07,0.078,0.071,0.043,0.07,0.037,0.023,0.081,0.064,0.063,-0.014,0.014,0.044
+medgemma:27b,realism_v1,0.122,0.124,0.146,0.092,0.111,0.11,0.108,0.087,-0.032,-0.008,0.155,0.044,0.034,-0.085,0.006,-0.017
+qwen3.8:27b,realism_v1,0.249,0.27,0.358,0.212,0.271,0.298,0.287,0.172,-0.066,-0.095,0.313,0.028,0.015,0.01,-0.072,-0.094
+qwen3-vl:30b,realism_v1,0.349,0.342,0.408,0.243,0.254,0.285,0.152,0.14,0.065,0.02,0.161,0.146,0.141,0.108,-0.007,0.032

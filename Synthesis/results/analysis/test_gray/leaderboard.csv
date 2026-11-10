@@ -1,0 +1,6 @@
+model,prompt_name,n_images,coverage,n_errors,score_mean,score_std,spearman_mae_hu_slice,spearman_mae_hu_slice_ci_low,spearman_mae_hu_slice_ci_high,pearson_mae_hu_slice,spearman_intra,auroc,latency_s_mean,vram_gb
+medgemma:latest,realism_v1,810,1.0,0,81.8,5.0,0.326,0.254,0.401,0.368,0.403,0.607,0.54,3.4
+llava:7b,realism_v1,810,1.0,0,91.2,25.4,0.193,0.086,0.301,0.242,0.241,0.543,0.48,5.6
+gemma4:latest,realism_v1,810,1.0,0,79.1,12.3,0.017,-0.05,0.087,0.066,0.302,0.472,3.85,4.0
+moondream:latest,realism_v1,810,1.0,0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.08,1.0
+qwen3-vl:8b,realism_v1,26,0.032,4,52.7,29.5,-0.272,-0.272,-0.272,-0.214,-0.148,0.217,5.03,17.3

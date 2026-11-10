@@ -15,13 +15,16 @@ ou en ligne de commande :
     python vlm_manager.py pull medgemma:4b      # télécharger un modèle
     python vlm_manager.py load medgemma:4b      # charger en VRAM
     python vlm_manager.py unload medgemma:4b    # décharger
+    python vlm_manager.py info                  # version exacte de chaque modèle, dans results/ollama_models.csv
 
 La station et son GPU sont partagés : on ne décharge que les modèles qu'on a soi-même
 chargés, jamais celui de quelqu'un d'autre (vérifier avec `ps`).
 """
 
 import argparse
+import csv
 import time
+from datetime import datetime
 
 import ollama
 
@@ -61,6 +64,56 @@ def installed_models(client):
 def loaded_models(client):
     """Modèles actuellement en mémoire, avec la VRAM occupée par chacun (en Go)."""
     return {m.model: m.size_vram / 1e9 for m in client.ps().models}
+
+
+PROFILE_COLUMNS = ["model", "digest", "family", "parameter_size", "quantization", "capabilities", "recorded_at"]
+
+
+def model_profile(client, model):
+    """Version exacte et caractéristiques d'un modèle installé.
+
+    Renvoie un dict : empreinte (digest, qui change si le tag est mis à jour), famille, nombre
+    de paramètres, quantification, capacités (« vision », « thinking »...) et thinking (bool).
+    """
+    model = full_name(model)
+    profile = dict.fromkeys(PROFILE_COLUMNS, "")
+    profile["model"] = model
+    details = None
+    for installed in client.list().models:
+        if installed.model == model:
+            profile["digest"] = installed.digest or ""
+            details = installed.details
+    capabilities = []
+    try:
+        shown = client.show(model)
+        capabilities = list(shown.capabilities or [])
+        details = shown.details or details
+    except ollama.ResponseError:
+        pass  # modèle absent : on renvoie ce qu'on a
+    if details is not None:
+        profile["family"] = details.family or ""
+        profile["parameter_size"] = details.parameter_size or ""
+        profile["quantization"] = details.quantization_level or ""
+    profile["capabilities"] = " ".join(capabilities)
+    profile["recorded_at"] = datetime.now().isoformat(timespec="seconds")
+    profile["thinking"] = "thinking" in capabilities
+    return profile
+
+
+def save_profiles(profiles, path=None):
+    """Met à jour le CSV des versions de modèles (une ligne par modèle, la plus récente)."""
+    path = path or config.MODELS_CSV
+    rows = {}
+    if path.exists():
+        with open(path, newline="", encoding="utf-8") as f:
+            rows = {row["model"]: row for row in csv.DictReader(f)}
+    for profile in profiles:
+        rows[profile["model"]] = {column: profile.get(column, "") for column in PROFILE_COLUMNS}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=PROFILE_COLUMNS)
+        writer.writeheader()
+        writer.writerows(rows[name] for name in sorted(rows))
 
 
 def pull_model(client, model):
@@ -117,7 +170,7 @@ def unload_model(client, model, wait_s=30):
 
 def main():
     parser = argparse.ArgumentParser(description="Gestion des VLM Ollama.")
-    parser.add_argument("action", choices=["list", "ps", "pull", "load", "unload"])
+    parser.add_argument("action", choices=["list", "ps", "pull", "load", "unload", "info"])
     parser.add_argument("model", nargs="?", help="nom du modèle, ex. medgemma:4b")
     args = parser.parse_args()
 
@@ -148,6 +201,14 @@ def main():
     elif args.action == "unload":
         unload_model(client, args.model)
         print(f"{args.model} déchargé.")
+
+    elif args.action == "info":
+        models = [args.model] if args.model else installed_models(client)
+        profiles = [model_profile(client, model) for model in models]
+        for p in profiles:
+            print(f"{p['model']:<22} {p['parameter_size']:>7} {p['quantization']:<8} {p['digest'][:12]}  {p['capabilities']}")
+        save_profiles(profiles)
+        print(f"Écrit dans {config.MODELS_CSV}")
 
 
 if __name__ == "__main__":

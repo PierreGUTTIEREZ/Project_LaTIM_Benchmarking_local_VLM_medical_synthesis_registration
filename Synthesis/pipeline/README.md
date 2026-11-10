@@ -20,6 +20,7 @@ uv run python vlm_manager.py ps                       # ce qui est en mémoire
 uv run python vlm_manager.py load medgemma:latest     # charger en VRAM (affiche le temps et la VRAM)
 uv run python vlm_manager.py unload medgemma:latest   # décharger
 uv run python vlm_manager.py pull <modèle>            # télécharger (cache partagé : vérifier df -h / avant)
+uv run python vlm_manager.py info                     # version exacte de chaque modèle → results/ollama_models.csv
 ```
 
 Le GPU est partagé : avant de lancer quoi que ce soit, `ps` permet de voir si quelqu'un d'autre l'utilise. On ne décharge jamais le modèle de quelqu'un d'autre.
@@ -59,8 +60,24 @@ Les résultats sont écrits dans `Synthesis/results/judgements.csv`, une ligne p
 | `vram_gb` | VRAM occupée par le modèle |
 | `error` | vide si tout s'est bien passé |
 | `timestamp` | date et heure du jugement |
+| `attempt` | essai qui a donné la note (1 = protocole de base, 2 ou 3 = nouvel essai) |
+| `tokens`, `thinking_chars` | tokens générés (réflexion comprise) et longueur de la réflexion cachée |
+| `retry_errors` | erreurs des essais ratés, séparées par « \| » |
+| `model_digest` | empreinte du modèle (détails dans `results/ollama_models.csv`) |
 
-Si le script est interrompu, il suffit de le relancer avec la même commande : les jugements déjà faits sont sautés. Les réponses sont plafonnées à `NUM_PREDICT` tokens : un modèle qui se met à boucler est noté en erreur au lieu de bloquer.
+Si le script est interrompu, il suffit de le relancer avec la même commande : les jugements déjà faits sont sautés, et les images restées en erreur (ou notées sans justification) sont retentées. Un ancien `judgements.csv` reçoit automatiquement les nouvelles colonnes (une copie de l'ancien fichier est gardée à côté).
+
+### Erreurs et nouveaux essais
+
+Les réponses sont plafonnées à `NUM_PREDICT` tokens (2 048), ou `NUM_PREDICT_THINKING` (8 192) pour les modèles qui réfléchissent avant de répondre : un modèle qui se met à boucler est coupé au lieu de bloquer. Une image en échec est retentée aussitôt, jusqu'à `MAX_ATTEMPTS` essais au total :
+
+| Essai | Réglage |
+|---|---|
+| 1 | protocole de base : consigne seule, température 0, graine 42 |
+| 2 | même chose, plus un message système qui rappelle le format JSON attendu |
+| 3 | en plus, température 0,7, pénalité de répétition 1,3, graine 43, et pas de réflexion si le modèle le permet |
+
+Les erreurs rattrapées sont surtout « réponse coupée » (boucle, ou réflexion trop longue) et « token repeat limit reached (status code: 500) » (Ollama arrête lui-même une boucle). `analyze.py` compte à part les images notées après un nouvel essai (colonne `n_retried` du leaderboard).
 
 ## Analyser les notes
 
@@ -87,6 +104,8 @@ Les corrélations sont **orientées** : +1 veut toujours dire « le VLM donne le
 | `pearson_mae_hu_slice` | relation linéaire entre note et MAE |
 | `spearman_intra` | à anatomie égale (même patient, même coupe), le VLM classe-t-il bien les sCT des différents générateurs ? La mesure la plus stricte |
 | `auroc` | le VLM sépare-t-il les coupes acceptables (MAE < `ACCEPTABLE_THRESHOLD`) des autres ? 0,5 = hasard |
+| `auroc_80`, `auroc_120` | la même chose avec un seuil de 80 et de 120 HU : le classement des juges ne doit pas dépendre du seuil |
+| `n_errors`, `n_retried` | images restées en échec (une note sans justification compte comme un échec), et images notées seulement après un nouvel essai |
 | `score_std` | dispersion des notes : proche de 0, le VLM donne toujours la même note |
 | `latency_s_mean`, `vram_gb` | coût du juge |
 

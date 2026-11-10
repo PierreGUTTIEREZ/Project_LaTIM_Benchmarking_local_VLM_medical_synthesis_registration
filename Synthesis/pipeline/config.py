@@ -48,8 +48,46 @@ SEED = 42
 
 # Nombre maximal de tokens générés par réponse. Une réponse normale en fait moins de 200 ;
 # le plafond évite qu'un petit modèle qui se met à répéter la même phrase (ça arrive à
-# température 0) bloque une image pendant des minutes. Une réponse coupée est notée en erreur.
+# température 0) bloque une image pendant des minutes. Une réponse coupée est retentée (voir plus bas).
 NUM_PREDICT = 2048
+
+# Les modèles qui « réfléchissent » avant de répondre (capacité « thinking » dans Ollama, par
+# exemple Qwen3-VL 8B) écrivent d'abord un raisonnement caché, compté dans le plafond : avec
+# 2048 tokens, 24 % des réponses de Qwen3-VL 8B étaient coupées avant même la note. Ces modèles
+# ont donc un plafond plus haut. Les réponses déjà réussies n'en sont pas changées : à
+# température 0, le plafond ne joue que sur les réponses qui l'atteignent.
+NUM_PREDICT_THINKING = 8192
+
+# Plafond propre à un modèle, si besoin (prioritaire sur les deux valeurs ci-dessus),
+# par exemple {"minicpm-v:8b": 1024}.
+NUM_PREDICT_BY_MODEL = {}
+
+# --- Nouveaux essais après une erreur ---------------------------------------
+
+# Deux pannes reviennent avec certains modèles :
+#   - « réponse coupée après N tokens » : le modèle boucle, ou réfléchit trop longtemps ;
+#   - « token repeat limit reached (status code: 500) » : Ollama arrête lui-même un modèle qui
+#     répète le même token en boucle (souvent des espaces ou des retours à la ligne dans le JSON).
+# Une image en erreur est retentée, jusqu'à MAX_ATTEMPTS essais au total. Le premier essai suit
+# toujours le protocole (température 0, consigne seule). Les suivants ajoutent ce que décrit
+# RETRY_STRATEGIES, dans l'ordre. Le numéro de l'essai réussi est écrit dans le CSV (colonne
+# attempt) : l'analyse compte ces images à part, et on peut les exclure si besoin.
+MAX_ATTEMPTS = 3
+JSON_HINT = (
+    'Answer only with a JSON object of the form {"score": <integer from 0 to 100>, '
+    '"reason": "<one or two sentences>"}.'
+)
+RETRY_STRATEGIES = [
+    # 2e essai : même réglage, plus un rappel du format attendu, en message système.
+    {"name": "json_hint", "system": JSON_HINT, "options": {}},
+    # 3e essai : en plus, un peu d'aléa et une pénalité de répétition pour sortir de la boucle,
+    # et pas de réflexion si le modèle le permet.
+    {"name": "json_hint_sampling", "system": JSON_HINT, "think": False,
+     "options": {"temperature": 0.7, "repeat_penalty": 1.3, "seed": SEED + 1}},
+]
+
+# Pause avant un nouvel essai après une erreur du serveur (Ollama relance parfois le modèle).
+RETRY_PAUSE_S = 2
 
 # --- Prompts ----------------------------------------------------------------
 
@@ -107,6 +145,10 @@ TESTBENCH_CSV = None
 RESULTS_DIR = SYNTHESIS_DIR / "results"
 DEFAULT_RESULTS_CSV = RESULTS_DIR / "judgements.csv"
 
+# Version exacte de chaque modèle utilisé (empreinte, taille, quantification, capacités), mise
+# à jour à chaque benchmark : les tags comme « latest » changent de contenu avec le temps.
+MODELS_CSV = RESULTS_DIR / "ollama_models.csv"
+
 # --- Analyse (analyze.py) -----------------------------------------------------
 
 ANALYSIS_DIR = RESULTS_DIR / "analysis"
@@ -129,6 +171,10 @@ LOWER_IS_BETTER = {"mae_hu", "mae_hu_slice"} | {
 # L'AUROC mesure si le VLM sépare les acceptables des autres (1 = parfait, 0,5 = hasard).
 ACCEPTABLE_METRIC = "mae_hu_slice"
 ACCEPTABLE_THRESHOLD = 100
+
+# Le seuil de 100 HU est un choix : l'AUROC est aussi calculée avec ces seuils, pour vérifier
+# que le classement des juges n'en dépend pas (colonnes auroc_80, auroc_120 du leaderboard).
+ACCEPTABLE_THRESHOLDS_SENSITIVITY = (80, 120)
 
 # Intervalles de confiance à 95 % par bootstrap sur les patients : on retire des patients
 # au hasard (avec remise) et on recalcule la corrélation, BOOTSTRAP_SAMPLES fois.

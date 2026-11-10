@@ -23,8 +23,13 @@ dans analyze.py, grâce à item_id.
 
 Le CSV de résultats est écrit au fur et à mesure. Si le script s'arrête en route, on le relance
 avec le même fichier de sortie et les jugements déjà réussis sont sautés. Les lignes en erreur
-sont retentées ; leurs anciennes versions restent dans le fichier et seront filtrées à l'analyse
-(colonne `error` non vide).
+(et les notes sans justification) sont retentées ; leurs anciennes versions restent dans le
+fichier et seront filtrées à l'analyse (colonne `error` non vide).
+
+Pendant le benchmark, une image en erreur (réponse coupée, erreur 500 « token repeat limit »...)
+est retentée tout de suite, jusqu'à MAX_ATTEMPTS fois (voir RETRY_STRATEGIES dans config.py).
+La colonne `attempt` dit à quel essai la note a été obtenue, `retry_errors` garde les erreurs
+des essais ratés. La version exacte de chaque modèle est notée dans results/ollama_models.csv.
 
 Exemples :
 
@@ -35,11 +40,12 @@ Exemples :
 
 import argparse
 import csv
+import shutil
 from datetime import datetime
 from pathlib import Path
 
 import config
-from judge import judge_image
+from judge import judge_with_retries, token_budget
 from vlm_manager import (
     check_server,
     full_name,
@@ -47,7 +53,9 @@ from vlm_manager import (
     installed_models,
     load_model,
     loaded_models,
+    model_profile,
     pull_model,
+    save_profiles,
     unload_model,
 )
 
@@ -61,6 +69,11 @@ RESULT_COLUMNS = [
     "vram_gb",
     "error",
     "timestamp",
+    "attempt",         # essai qui a donné la note (1 = protocole de base)
+    "tokens",          # tokens générés, réflexion comprise
+    "thinking_chars",  # longueur de la réflexion cachée (0 si le modèle ne réfléchit pas)
+    "retry_errors",    # erreurs des essais ratés, séparées par « | »
+    "model_digest",    # empreinte du modèle (voir results/ollama_models.csv)
 ]
 
 
@@ -86,8 +99,31 @@ def read_testbench(testbench_csv):
     return items
 
 
+def upgrade_results_csv(results_csv):
+    """Ajoute au CSV de résultats les colonnes apparues depuis sa création (vides pour les anciennes lignes).
+
+    Sans ça, les nouvelles lignes seraient écrites avec plus de colonnes que l'en-tête.
+    Une copie de l'ancien fichier est gardée à côté, au cas où.
+    """
+    if not results_csv.exists():
+        return
+    with open(results_csv, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        if reader.fieldnames == RESULT_COLUMNS:
+            return
+        rows = list(reader)
+    backup = results_csv.with_name(f"{results_csv.stem}_avant_{datetime.now():%Y%m%d_%H%M%S}.csv")
+    shutil.copy2(results_csv, backup)
+    with open(results_csv, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=RESULT_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({column: row.get(column, "") for column in RESULT_COLUMNS})
+    print(f"{results_csv.name} : colonnes ajoutées ({len(rows)} lignes). Ancienne version gardée dans {backup.name}.")
+
+
 def already_done(results_csv):
-    """Renvoie l'ensemble des (model, prompt_name, item_id) déjà jugés sans erreur."""
+    """Renvoie l'ensemble des (model, prompt_name, item_id) déjà jugés sans erreur et avec une justification."""
     if not results_csv.exists():
         return set()
 
@@ -95,7 +131,7 @@ def already_done(results_csv):
         return {
             (row["model"], row["prompt_name"], row["item_id"])
             for row in csv.DictReader(f)
-            if not row["error"]
+            if not row["error"] and (row.get("reason") or "").strip()
         }
 
 
@@ -115,9 +151,15 @@ def run_model(client, model, items, prompt_name, results_csv):
     if others:
         print(f"  Attention : {', '.join(others)} déjà en mémoire (quelqu'un l'utilise peut-être).")
 
+    profile = model_profile(client, model)
+    save_profiles([profile])
+    budget = token_budget(model, profile)
     load_time, vram_gb = load_model(client, model)
-    print(f"{model} chargé en {load_time:.1f} s ({vram_gb:.1f} Go de VRAM).")
+    print(f"{model} chargé en {load_time:.1f} s ({vram_gb:.1f} Go de VRAM), "
+          f"{profile['parameter_size'] or '?'} paramètres, réflexion : {'oui' if profile['thinking'] else 'non'}, "
+          f"plafond {budget} tokens.")
 
+    counts = {"premier essai": 0, "après nouvel essai": 0, "en échec": 0}
     try:
         for i, item in enumerate(items, start=1):
             row = {
@@ -127,22 +169,29 @@ def run_model(client, model, items, prompt_name, results_csv):
                 "vram_gb": round(vram_gb, 2),
                 "error": "",
                 "timestamp": datetime.now().isoformat(timespec="seconds"),
+                "model_digest": profile["digest"][:12],
             }
             # Une image qui pose problème (timeout, réponse invalide...) ne doit pas
-            # arrêter tout le banc : on note l'erreur et on passe à la suivante.
-            try:
-                row.update(judge_image(client, model, item["image_path"], config.PROMPTS[prompt_name]))
-                status = f"score {row['score']:3d}  ({row['latency_s']} s)"
-            except Exception as error:
-                row["error"] = f"{type(error).__name__}: {error}"
-                status = f"ERREUR {row['error']}"
+            # arrêter tout le banc : on la retente, puis on note l'erreur et on passe à la suivante.
+            result, attempt, errors = judge_with_retries(
+                client, model, item["image_path"], config.PROMPTS[prompt_name], budget, profile["thinking"])
+            row["attempt"] = attempt
+            row["retry_errors"] = " | ".join(errors)
+            if result:
+                row.update(result)
+                counts["premier essai" if attempt == 1 else "après nouvel essai"] += 1
+                status = f"score {row['score']:3d}  ({row['latency_s']} s)" + (f"  essai {attempt}" if attempt > 1 else "")
+            else:
+                row["error"] = errors[-1]
+                counts["en échec"] += 1
+                status = f"ERREUR après {attempt} essais : {row['error']}"
 
             append_result(results_csv, row)
             print(f"  [{i}/{len(items)}] {item['item_id']} : {status}")
     finally:
         # Exécuté même après un Ctrl+C, pour ne pas laisser la VRAM occupée.
         unload_model(client, model)
-        print(f"{model} déchargé.\n")
+        print(f"{model} déchargé. Notes : " + ", ".join(f"{n} {label}" for label, n in counts.items()) + "\n")
 
 
 def run_benchmark(testbench_csv, models, prompt_name, results_csv, pull_missing):
@@ -151,6 +200,7 @@ def run_benchmark(testbench_csv, models, prompt_name, results_csv, pull_missing)
 
     items = read_testbench(testbench_csv)
     results_csv.parent.mkdir(parents=True, exist_ok=True)
+    upgrade_results_csv(results_csv)
     done = already_done(results_csv)
     installed = installed_models(client)
 

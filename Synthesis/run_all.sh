@@ -14,6 +14,9 @@
 #                              prompts à tester (défaut : DEFAULT_PROMPT de pipeline/config.py)
 #   DOSE=1                     calculer aussi les métriques de dose (dose.py, long, sur le processeur)
 #
+# Relancer la même commande retente les images restées en erreur (réponse coupée, erreur 500
+# « token repeat limit », justification vide), avec les nouveaux essais de pipeline/config.py.
+#
 # Comparer les trois prompts sur val (chaque prompt multiplie la durée du benchmark) :
 #   PROMPTS="realism_v1 brain_rubric_v1 defects_v1" bash run_all.sh val gray
 #
@@ -81,6 +84,8 @@ if [[ "${DOSE:-0}" == "1" ]]; then
 fi
 
 cd "$SYNTHESIS_DIR/pipeline"
+step "     Versions des modèles Ollama (results/ollama_models.csv)"
+uv run python vlm_manager.py info || echo "Attention : impossible de lire les versions des modèles. On continue."
 for style in "${STYLES[@]}"; do
     testbench="../sct_generation/work/testbench/$SPLIT/$style/testbench.csv"
 

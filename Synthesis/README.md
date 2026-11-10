@@ -5,6 +5,7 @@
 | [`sct_generation/`](sct_generation/) | produire des sCT de qualité variée (U-Net entraîné par nos soins + 3 modèles pré-entraînés), puis le banc d'essai : métriques et rendu PNG |
 | [`pipeline/`](pipeline/) | faire noter les PNG par les VLM via Ollama, puis analyser les notes (leaderboard) |
 | [`results/`](results/) | CSV des jugements des VLM et résultats de l'analyse |
+| [`report/`](report/) | rapport scientifique (`rapport.pdf`, source LaTeX), diaporama de restitution (`restitution.pptx`) et scripts qui les régénèrent depuis `results/` |
 
 Le guide complet, avec le tutoriel commande par commande, est dans [`Mode d'emploi du volet Synthèse.html`](Mode%20d'emploi%20du%20volet%20Synth%C3%A8se.html).
 

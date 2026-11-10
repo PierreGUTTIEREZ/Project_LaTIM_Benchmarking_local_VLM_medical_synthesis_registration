@@ -27,7 +27,8 @@ la même note obtient 0.
 Colonnes du leaderboard (la métrique de référence est TARGET_METRIC dans config.py) :
 
     n_images, coverage       images notées sans erreur, et leur part dans le banc d'essai
-    n_errors                 images restées en erreur
+    n_errors                 images restées en erreur (une note sans justification compte comme une erreur)
+    n_retried                images notées seulement après un nouvel essai (voir RETRY_STRATEGIES)
     score_mean, score_std    moyenne et dispersion des notes (dispersion nulle = juge inutile)
     spearman_<métrique>      corrélation de rang entre note et métrique, sur toutes les images
     ..._ci_low, ..._ci_high  intervalle de confiance à 95 % (bootstrap sur les patients)
@@ -37,6 +38,7 @@ Colonnes du leaderboard (la métrique de référence est TARGET_METRIC dans conf
                              C'est la mesure la plus stricte : elle ne récompense pas un juge qui
                              réagit seulement au contenu de la coupe (beaucoup d'os, sinus...).
     auroc                    séparation des sCT acceptables / non acceptables (0,5 = hasard)
+    auroc_80, auroc_120      la même avec d'autres seuils (ACCEPTABLE_THRESHOLDS_SENSITIVITY)
     latency_s_mean, vram_gb  coût du juge
 """
 
@@ -75,12 +77,16 @@ def load_judgements(path):
     """Renvoie (notes réussies, notes restées en erreur), sans doublons."""
     if not path.exists():
         raise SystemExit(f"{path} introuvable : lancer d'abord benchmark.py.")
-    judgements = pd.read_csv(path, dtype={"error": str})
+    judgements = pd.read_csv(path, dtype={"error": str, "reason": str, "retry_errors": str})
     if judgements.empty:
         raise SystemExit(f"{path} est vide : lancer d'abord benchmark.py.")
 
     key = JUDGE_KEY + ["item_id"]
     judgements["error"] = judgements["error"].fillna("")
+    # Une note sans justification ne respecte pas la consigne : on la compte comme un échec
+    # (benchmark.py la retente aussi). C'était surtout le cas de MiniCPM-V.
+    empty = (judgements["error"] == "") & (judgements["reason"].fillna("").str.strip() == "")
+    judgements.loc[empty, "error"] = "ValueError: justification vide"
     ok = judgements[judgements["error"] == ""].drop_duplicates(key, keep="last")
 
     # Une image en erreur puis réussie au second essai ne compte pas comme une erreur.
@@ -158,11 +164,12 @@ def intra_slice_correlation(data, metric):
     return float(np.nanmean(values)) if values else np.nan
 
 
-def is_acceptable(values):
+def is_acceptable(values, threshold=None):
     values = np.asarray(values, dtype=float)
+    threshold = config.ACCEPTABLE_THRESHOLD if threshold is None else threshold
     if config.ACCEPTABLE_METRIC in config.LOWER_IS_BETTER:
-        return values < config.ACCEPTABLE_THRESHOLD
-    return values > config.ACCEPTABLE_THRESHOLD
+        return values < threshold
+    return values > threshold
 
 
 def auroc(scores, positive):
@@ -222,6 +229,7 @@ def judge_tables(merged, failed, n_testbench, rng):
     for (model, prompt_name), data in merged.groupby(JUDGE_KEY, sort=False):
         judge = {"model": model, "prompt_name": prompt_name}
         n_errors = len(failed[(failed["model"] == model) & (failed["prompt_name"] == prompt_name)])
+        attempts = pd.to_numeric(data["attempt"], errors="coerce").fillna(1) if "attempt" in data else pd.Series(1)
         low, high = bootstrap_interval(data, target, rng)
 
         leaderboard.append({
@@ -229,6 +237,7 @@ def judge_tables(merged, failed, n_testbench, rng):
             "n_images": len(data),
             "coverage": round(len(data) / n_testbench, 3),
             "n_errors": n_errors,
+            "n_retried": int((attempts > 1).sum()),
             "score_mean": round(data["score"].mean(), 1),
             "score_std": round(data["score"].std(ddof=0), 1),
             f"spearman_{target}": round(correlation(data["score"], data[target], target), 3),
@@ -237,6 +246,8 @@ def judge_tables(merged, failed, n_testbench, rng):
             f"pearson_{target}": round(correlation(data["score"], data[target], target, pearsonr), 3),
             "spearman_intra": round(intra_slice_correlation(data, target), 3),
             "auroc": round(auroc(data["score"], is_acceptable(data[config.ACCEPTABLE_METRIC])), 3),
+            **{f"auroc_{t}": round(auroc(data["score"], is_acceptable(data[config.ACCEPTABLE_METRIC], t)), 3)
+               for t in config.ACCEPTABLE_THRESHOLDS_SENSITIVITY},
             "latency_s_mean": round(data["latency_s"].mean(), 2),
             "vram_gb": round(data["vram_gb"].max(), 1),
         })

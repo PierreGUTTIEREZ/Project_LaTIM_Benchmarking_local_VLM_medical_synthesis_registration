@@ -506,7 +506,7 @@ footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--rule);
 
               <rect x="390" y="50" width="200" height="240" rx="8" class="d-box hl"/>
               <text x="490" y="150" text-anchor="middle" class="d-title">Clone du dépôt</text>
-              <text x="490" y="174" text-anchor="middle" class="d-capmono">~/projects/…</text>
+              <text x="490" y="174" text-anchor="middle" class="d-capmono">~/projets/groupe32/dev/…</text>
               <text x="490" y="196" text-anchor="middle" class="d-capmono">uv run python …</text>
 
               <rect x="700" y="50" width="225" height="60" rx="8" class="d-box"/>
@@ -1034,13 +1034,13 @@ git push</code></pre>
               <h3>Récupérer le code <span class="where-tag">station · une fois</span></h3>
               <p>Un seul clone pour toute l'équipe : prévenez-vous avant d'en créer un.</p>
               <div class="code nolabel">
-<pre><code>mkdir -p ~/projects &amp;&amp; cd ~/projects
+<pre><code>mkdir -p /home/student/projets/groupe32/dev &amp;&amp; cd /home/student/projets/groupe32/dev
 git clone https://github.com/PierreGUTTIEREZ/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration.git
 cd Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis</code></pre>
               </div>
               <p>Les fois suivantes, pour récupérer les dernières modifications :</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
 git pull</code></pre>
               </div>
             </div>
@@ -1051,7 +1051,7 @@ git pull</code></pre>
               <h3>Installer l'environnement Python <span class="where-tag">station · une fois</span></h3>
               <p><code>uv sync</code> lit <code>pyproject.toml</code> et <code>uv.lock</code>, puis installe exactement les mêmes versions pour tout le monde, dont le PyTorch compatible avec la RTX 5090. À relancer seulement si ces fichiers changent, par exemple après un <code>git pull</code> qui apporte de nouvelles bibliothèques.</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
 uv sync
 uv run python -c "import torch; print(torch.cuda.is_available())"</code></pre>
               </div>
@@ -1074,7 +1074,7 @@ ls /home/student/DATA/SYNTHESIS/brain/1BA001</code></pre>
             <div class="step-body">
               <h3>Découper les patients <span class="where-tag">station</span></h3>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation
 uv run python make_split.py</code></pre>
               </div>
               <p class="expect">Avec les mêmes 180 patients que la copie de ton PC, tu dois voir <b>train 126, val 27, test 27</b>, avec les centres A, B et C dans chaque groupe.</p>
@@ -1083,7 +1083,7 @@ uv run python make_split.py</code></pre>
                 <span class="where">Sur ton PC, dans PowerShell</span>
 <pre><code>cd "C:/Users/agent/Documents/IMT/Commande-Entreprise/Code/Synthese/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration"
 mkdir Synthesis/sct_generation/splits     <span class="c"># le scp de Windows ne crée pas le dossier</span>
-scp student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation/splits/task1_brain.csv Synthesis/sct_generation/splits/task1_brain.csv
+scp student@100.106.248.35:/home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation/splits/task1_brain.csv Synthesis/sct_generation/splits/task1_brain.csv
 git add Synthesis/sct_generation/splits/task1_brain.csv
 git commit -m "Split train/val/test du cerveau"
 git push</code></pre>
@@ -1143,7 +1143,7 @@ ls work/runs/unet_baseline/checkpoints</code></pre>
               <h3>Mettre à jour le code de la station <span class="where-tag">station</span></h3>
               <p>À faire <b>une fois l'entraînement terminé</b> (pas pendant : <code>uv sync</code> pourrait remplacer des bibliothèques qu'il utilise), et seulement après avoir poussé la dernière version depuis ton PC (étape 1, avec <code>uv lock</code>).</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration
 git status --short                                   <span class="c"># ce que la station a modifié ou créé</span>
 git checkout -- Synthesis/uv.lock                    <span class="c"># si « M Synthesis/uv.lock » apparaît</span>
 mv Synthesis/sct_generation/splits/task1_brain.csv ~/task1_brain.csv.bak   <span class="c"># si « ?? …/splits/ » apparaît</span>
@@ -1172,7 +1172,7 @@ uv run python predict.py --run unet_baseline --split val   <span class="c"># pat
               <h3>Générer les sCT des modèles pré-entraînés <span class="where-tag">station</span></h3>
               <p>Le script appelle celui de Vincent, patient par patient. Il utilise le GPU : vérifie d'abord <code>nvidia-smi</code>, comme pour l'entraînement. On commence par val, qui sert à la mise au point.</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/sct_generation
 uv run python pretrained.py --split val --patients 1BA005   <span class="c"># essai sur un patient de val (à prendre dans splits/task1_brain.csv)</span>
 uv run python pretrained.py --split val                     <span class="c"># tous les patients de val</span>
 uv run python pretrained.py                                 <span class="c"># patients de test</span></code></pre>
@@ -1200,7 +1200,7 @@ uv run python make_testbench.py --split val --style rgb3       <span class="c">#
               <h3>Faire noter une image par un VLM <span class="where-tag">station</span></h3>
               <p>Avant le benchmark complet, on vérifie qu'un modèle répond bien sur une image du banc d'essai :</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/pipeline
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/pipeline
 uv run python vlm_manager.py list                     <span class="c"># modèles installés</span>
 uv run python vlm_manager.py ps                       <span class="c"># modèles chargés en ce moment</span>
 ls ../sct_generation/work/testbench/val/gray/renders | head -3
@@ -1250,7 +1250,7 @@ uv run python analyze.py --testbench ../sct_generation/work/testbench/val/gray/t
               <p><code>run_all.sh</code> lance à la suite les étapes 11 à 16 (inutile de les avoir faites à la main avant) : sCT du U-Net, sCT de Li, Fu et Spadea, banc d'essai, benchmark des VLM installés, analyse. Chaque étape saute ce qui est déjà fait : après une coupure, on relance la même commande. On commence par un <b>essai complet sur deux patients de val</b>, pour vérifier toute la chaîne avant les longs calculs :</p>
               <div class="code nolabel">
 <pre><code>tmux new -s chaine
-cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
+cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
 MAX_PATIENTS=2 bash run_all.sh val gray 2&gt;&amp;1 | tee essai_rapide.log</code></pre>
               </div>
               <p class="expect">Les quatre étapes défilent, avec l'heure. À la fin : un banc d'essai d'environ <b>60 images</b> (2 patients × 10 générateurs × 3 coupes), une note par image et par VLM installé, et un leaderboard dans <b>results/analysis/val_gray/</b>. Ouvre quelques PNG de <b>sct_generation/work/testbench/val/gray/renders/</b> et un montage de <b>sct_generation/work/pretrained/val/</b> pour vérifier à l'œil. Regarde aussi si <code>qwen3.8:27b</code> a beaucoup d'erreurs « réponse coupée » (voir le <a href="#depannage">dépannage</a>).</p>
@@ -1274,7 +1274,7 @@ MODELS="medgemma:latest gemma4:latest" bash run_all.sh val   <span class="c"># v
               <h3>Résultats finaux sur test <span class="where-tag">station</span></h3>
               <p>Une seule fois, quand le style de rendu et le prompt sont choisis. Le script refuse de se lancer sur test sans qu'on lui donne le style.</p>
               <div class="code nolabel">
-<pre><code>cd ~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
+<pre><code>cd /home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis
 DOSE=1 bash run_all.sh test gray 2&gt;&amp;1 | tee test.log     <span class="c"># remplacer gray par le style choisi sur val</span></code></pre>
               </div>
               <p class="expect">Banc d'essai de <b>810 images</b> (27 patients × 10 générateurs × 3 coupes), puis le leaderboard à rapporter dans <b>results/analysis/test_gray/</b>. Le prompt utilisé est <code>DEFAULT_PROMPT</code> de <code>pipeline/config.py</code> : y mettre celui choisi sur val avant de lancer (ou passer <code>PROMPTS="&lt;nom&gt;"</code> devant la commande).</p>
@@ -1286,8 +1286,8 @@ DOSE=1 bash run_all.sh test gray 2&gt;&amp;1 | tee test.log     <span class="c">
               <h3>Récupérer les résultats <span class="where-tag">ton PC</span></h3>
               <p>Les notes et les résultats de l'analyse ne contiennent aucune image patient : on peut les commiter.</p>
               <div class="code nolabel">
-<pre><code>scp student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/judgements.csv Synthesis/results/
-scp -r student@100.106.248.35:~/projects/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/analysis Synthesis/results/</code></pre>
+<pre><code>scp student@100.106.248.35:/home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/judgements.csv Synthesis/results/
+scp -r student@100.106.248.35:/home/student/projets/groupe32/dev/Project_LaTIM_Benchmarking_local_VLM_medical_synthesis_registration/Synthesis/results/analysis Synthesis/results/</code></pre>
               </div>
             </div>
           </li>

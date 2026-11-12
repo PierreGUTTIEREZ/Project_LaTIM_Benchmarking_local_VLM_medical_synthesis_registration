@@ -1,0 +1,3 @@
+model,prompt_name,n_images,n_kept,mae_hu_slice_random,mae_hu_slice_judge,mae_hu_slice_oracle,gain_vs_oracle
+qwen3.8:27b,realism_v1,810,405,133.11,118.56,85.771,0.307
+qwen3-vl:8b,realism_v1,810,405,133.11,122.541,85.771,0.223

@@ -1,0 +1,3 @@
+model,prompt_name,spearman_mae_hu_slice,spearman_psnr_db_slice,spearman_ssim_slice,spearman_mae_hu,spearman_psnr_db,spearman_ssim,spearman_gamma_photons,spearman_dose_diff_photons,spearman_ptv_d98_photons,spearman_ptv_d2_photons,spearman_body_dmean_photons,spearman_gamma_protons,spearman_dose_diff_protons,spearman_ptv_d98_protons,spearman_ptv_d2_protons,spearman_body_dmean_protons
+qwen3.8:27b,realism_v1,0.248,0.261,0.336,0.266,0.304,0.337,0.268,0.162,-0.092,-0.045,0.206,0.059,0.045,0.046,-0.073,-0.089
+qwen3-vl:8b,realism_v1,0.217,0.203,0.22,0.196,0.216,0.213,0.169,0.174,0.026,0.019,0.188,0.104,0.103,0.043,0.073,0.035

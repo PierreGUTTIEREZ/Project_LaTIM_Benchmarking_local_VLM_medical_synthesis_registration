@@ -1,0 +1,20 @@
+model,digest,family,parameter_size,quantization,capabilities,recorded_at
+deepseek-r1:32b,edba8017331d15236e57480eb45406c0d721db77a4cdcf234df500fc2ad3960c,qwen2,32.8B,Q4_K_M,tools thinking completion,2026-11-12T07:06:28
+ds32-5090:latest,8817d91414b516b64e3b70acabc680a087205e4690ee16a199890eecf5e8b5a1,qwen2,32.8B,Q4_K_M,tools thinking completion,2026-11-12T07:06:28
+gemma4-5090:latest,f38f1cfc336a922abbe0461f4680550ea14470d3a68509e17f4cc896fa24db49,gemma4,31.3B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+gemma4:31b,6316f0629137b426c9d9b853ffc4c8209589f30ee39aebede6285096c0ff47e7,gemma4,31.3B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+gemma4:latest,c6eb396dbd5992bbe3f5cdb947e8bbc0ee413d7c17e2beaae69f5d569cf982eb,gemma4,8.0B,Q4_K_M,completion vision audio tools thinking,2026-11-12T07:06:28
+llava:13b,0d0eb4d7f485d7d0a21fd9b0c1d5b04da481d2150a097e81b64acb59758fdef6,llama,13B,Q4_0,completion vision,2026-11-12T07:06:28
+llava:7b,8dd30f6b0cb19f555f2c7a7ebda861449ea2cc76bf1f44e262931f45fc81d081,llama,7B,Q4_0,completion vision,2026-11-12T07:06:28
+medgemma:27b,58238ae38f99827496301de22016b2f94157552971f5a38db226f13802c2437e,gemma3,27.4B,Q4_K_M,completion vision,2026-11-12T07:06:28
+medgemma:latest,9fe4e9a6c9bda2d007bb595515550eafbc8e226622adff9257f3241eba334c4d,gemma3,4.3B,Q4_K_M,completion vision,2026-11-12T07:06:28
+minicpm-v:8b,c92bfad0120556eda311984f1ac2f0d0a589b8d68c4053c13486b526276aa205,qwen2,7.6B,Q4_0,completion vision,2026-11-12T07:06:28
+moondream:latest,55fc3abd386771e5b5d1bbcc732f3c3f4df6e9f9f08f1131f9cc27ba2d1eec5b,phi2,1B,Q4_0,completion vision,2026-11-12T07:06:28
+odytrice/gemma4:5090-26b,15ebceb916f3b35d72ed75b893e33d7a551dd9207e68ca7a35ff74fbabb5b169,gemma4,25.8B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+odytrice/qwen3.6:5090-35b,5e73757edfc667cae9096a3d3ffd480af321a5a494051c147d182b6ce168c68e,qwen35moe,36.0B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+qwen3-vl:30b,eda0be1008774ea4e575187712b9a3b1201f3e66e7ecff899cc295db1cf00248,qwen3vlmoe,31.1B,Q4_K_M,completion vision tools thinking,2026-11-12T08:35:30
+qwen3-vl:32b,ff2e46876908853b8d0872595047c46d599d970056277e4864c8a1f0fd93fd3b,qwen3vl,33.4B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+qwen3-vl:8b,9cf69da2b16d097f7def535917c4b55a95d6c7ee5700eb69ab86b01b3cfca487,qwen3vl,8.2B,Q4_K_M,completion vision tools thinking,2026-11-12T07:59:57
+qwen3.6-35b-a3b-5090:latest,30967c728b5a5bd2d3b3b072c90a6d20d58172ef617523ccd0a56a276240859c,qwen35moe,36.0B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+qwen3.6:35b-a3b,07d35212591fc27746f0a317c975a6d68754fb38e9053d82e25f06057af28522,qwen35moe,36.0B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28
+qwen3.8:27b,22130167c4c20e20c7b71454612966ca8e8171e9b3cc8ab6ce8aa6cbfec79643,qwen35,27.3B,Q4_K_M,completion vision tools thinking,2026-11-12T07:06:28

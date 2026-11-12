@@ -1,6 +1,10 @@
 model,prompt_name,n_images,n_kept,mae_hu_slice_random,mae_hu_slice_judge,mae_hu_slice_oracle,gain_vs_oracle
-moondream:latest,realism_v1,810,405,133.11,133.11,85.771,0.0
+moondream:latest,realism_v1,809,404,133.182,133.182,85.797,0.0
 medgemma:latest,realism_v1,810,405,133.11,118.349,85.771,0.312
 llava:7b,realism_v1,810,405,133.11,126.901,85.771,0.131
 gemma4:latest,realism_v1,810,405,133.11,129.899,85.771,0.068
-qwen3-vl:8b,realism_v1,26,13,158.392,165.47,103.084,-0.128
+qwen3-vl:8b,realism_v1,810,405,133.11,134.632,85.771,-0.032
+qwen3-vl:30b,realism_v1,810,405,133.11,114.136,85.771,0.401
+qwen3.8:27b,realism_v1,810,405,133.11,139.332,85.771,-0.131
+medgemma:27b,realism_v1,810,405,133.11,132.893,85.771,0.005
+llava:13b,realism_v1,810,405,133.11,134.434,85.771,-0.028
